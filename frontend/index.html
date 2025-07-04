@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Refugee Management System</title>
+</head>
+<link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="plugin/yo/yo.css">
+<body>
+<nav id="topbar" class="navbar navbar-light bg-light">
+  <a class="navbar-brand">Refugee Accommodation System</a>
+</nav>
+<div class="row m-0">
+  <div class="sidebar col-2">
+    <a href="" class="active">Accommodation</a>
+    <a href="hosts.html">Host</a>
+    <a href="guest.html">Guest</a>
+    <a href="placements.html">Placement</a>
+  </div>
+  <div class="content col">
+    <h1>Accommodation Management</h1>
+    <div class="toolbar mb-3">
+      <div class="btn-group">
+        <button id="btn_add" class="btn btn-secondary">Add New</button>
+        <!-- <button id="btn_export" class="btn btn-outline-secondary">Export</button> -->
+      </div>
+      <form id="form_search" class="d-inline-block search">
+        <div class="input-group">
+          <input id="input_search" type="search" class="form-control" placeholder="Search by address, postcode or status">
+          <div class="input-group-append">
+            <button class="btn btn-secondary" type="submit">Search</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="mb-3">
+      <h2>Add/Update Accommodation</h2>
+      <form id="form_main" hidden>
+        <input name="id" type="hidden">
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input name="address" id="address" class="form-control" type="text" required>
+        </div>
+        <div class="form-group">
+          <label for="postcode">Postcode</label>
+          <input name="postcode" id="postcode" class="form-control" type="text"
+                 placeholder="e.g. SW1A 1AA" required>
+        </div>
+        <div class="form-group">
+          <label for="host_id">Primary Host</label>
+          <select class="form-control" name="host_id" id="host_id" required>
+            <option value="">Select a host...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select name="status" id="status" class="form-control" required>
+            <option value="">Select status...</option>
+            <option value="available">Available</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary" type="submit">Submit</button>
+          <button id="form_main_cancel" class="btn btn-secondary" type="button">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div>
+      <table id="table_main" class="table table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Address</th>
+            <th>Postcode</th>
+            <th>Host</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="pager"></div>
+    </div>
+  </div>
+</div>
+<script src="plugin/yo/yo.js"></script>
+<script src="plugin/pager/pager.js"></script>
+<script src="js/main.js"></script>
+<script src="js/accommodation.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+.hidden {
+  display: none !important;
+}
+
+.yo {
+  max-width: 350px;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+}
+
+.yo-container {
+  background: #fff;
+  padding: .3rem .5rem;
+  border: 1px solid rgba(0, 0, 0, .1);
+  border-radius: .3rem;
+  color: #fff;
+  background: #047afe;
+}
+
+.error .yo-container {
+  background: #dc3545;
+}
+
+.warn .yo-container {
+  background: #f18b06;
+}
+
+.success .yo-container {
+  background: #04b15b;
+}
+
+.yo-title {
+  font-weight: bold;
+}
