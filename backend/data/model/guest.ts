@@ -4,7 +4,7 @@ import { Base } from './base';
 
 export class Guest extends Base {
   static type: ModelType = 'guests';
-  static searchable: string[] = ['full_name'];
+  static searchable: string[] = ['full_name','status'];
   static fillable: string[] = ['full_name', 'date_of_birth', 'status'];
   static statuses: string[] = ['placed', 'unplaced'];
 

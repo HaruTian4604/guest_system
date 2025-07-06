@@ -16,7 +16,11 @@ h2 {
 }
 
 .toolbar .search {
-  min-width: 10rem;
+  min-width: 25rem;
+}
+
+#form_search .btn{
+  margin-left: .5rem;
 }
 .badge{
   background-color: orange;

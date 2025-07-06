@@ -1,4 +1,4 @@
-# Refugee Management System API Doc
+# Guest Management System API Doc
 
 ## Data Models
 
