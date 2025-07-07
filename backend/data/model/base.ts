@@ -39,7 +39,7 @@ export class Base {
    * @param id
    */
   static async delete(id: number) {
-    if ( ! id) { throw new Invalid_argument('ID parameter is required'); }
+    if (!id) { throw new Invalid_argument('ID parameter is required'); }
     await delete_row(this.type, id);
   }
 
@@ -48,7 +48,7 @@ export class Base {
    * @param partial
    */
   static async update(partial: any) {
-    if ( ! partial.id) { throw new Invalid_argument('ID parameter is required'); }
+    if (!partial.id) { throw new Invalid_argument('ID parameter is required'); }
 
     const obj = only(partial, this.fillable);
     obj.id = parseInt(partial.id);
@@ -66,13 +66,13 @@ export class Base {
    */
   static async list(page = 1, limit = 15, order_by = 'id', desc = false, keyword?: string) {
     const list = Object.values(await get_data(this.type));
-    let copy = [ ...list ];
+    let copy = [...list];
 
     // Search
     if (keyword) {
       copy = copy.filter((it: any) => {
         for (let prop of this.searchable) {
-          if (it[prop]?.includes(keyword)) {
+          if (it[prop]?.toLowerCase().includes(keyword.toLowerCase())) {
             return true;
           }
         }
@@ -82,12 +82,25 @@ export class Base {
     }
 
     // Sort
+    // copy.sort((a, b) => {
+    //   const va = a[order_by] + '';
+    //   const vb = b[order_by] + '';
+    //   let num = va.localeCompare(vb);
+    //   if (desc) { num = num * -1; }
+    //   return num;
+    // });
     copy.sort((a, b) => {
-      const va = a[order_by] + '';
-      const vb = b[order_by] + '';
-      let num = va.localeCompare(vb);
-      if (desc) { num = num * -1; }
-      return num;
+      const va = a[order_by];
+      const vb = b[order_by];
+
+      let num;
+      if (typeof va === 'number' && typeof vb === 'number') {
+        num = va - vb;
+      } else {
+        num = String(va).localeCompare(String(vb));
+      }
+
+      return desc ? -num : num;
     });
 
     const skip = (page - 1) * limit;
@@ -106,5 +119,5 @@ export class Base {
   /**
    * Validate record data
    */
-  static validate(row: any) {}
+  static validate(row: any) { }
 }
