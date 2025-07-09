@@ -49,6 +49,7 @@ async function load_hosts() {
     }
   } catch (error) {
     console.error('Failed to load hosts:', error)
+    yo_error('Failed to load hosts list')
   }
 }
 
@@ -208,7 +209,7 @@ function listen() {
 
 function validatePostcode(postcode) {
   // Simple UK postcode validation
-  const regex = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s?\d[A-Z]{2}$/i
+  const regex = /^[A-Za-z]{1,2}\d{1,2}[A-Za-z]?\s?\d[A-Za-z]{2}$/i
   return regex.test(postcode)
 }
 

@@ -29,17 +29,36 @@ async function boot() {
   })
 }
 
+// async function list_and_render() {
+//   try {
+//     const r = await admin.list('guest', list_args)
+//     if (r && r.data) {
+//       rows = r.data
+//       total = r.total
+//       await render_table(rows)
+//     }
+//   } catch (error) {
+//     console.error('Error loading guests:', error)
+//     yo_error('Failed to load guests')
+//   }
+// }
+
 async function list_and_render() {
   try {
-    const r = await admin.list('guest', list_args)
+    const r = await admin.list('guest', {
+      ...list_args,
+      page: list_args.page || 1,
+      limit: list_args.limit || limit
+    });
+    //  console.log('API responds:', r); // debug log
     if (r && r.data) {
-      rows = r.data
-      total = r.total
-      await render_table(rows)
+      rows = r.data;
+      total = r.total;
+      await render_table(rows);
     }
   } catch (error) {
-    console.error('Error loading guests:', error)
-    yo_error('Failed to load guests')
+    console.error('Error loading guests:', error);
+    yo_error('Failed to load guests');
   }
 }
 
@@ -178,6 +197,8 @@ function listen() {
     } catch (error) {
       yo_error(`Failed to ${action} guest: ${error.message}`)
     }
+
+
   })
 
   e_pager.addEventListener('click', e => {

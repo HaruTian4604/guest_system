@@ -4,12 +4,9 @@ import { parse_request, parse_route } from '../net/request';
 
 const http = require('http');
 
-/**
- * 创建 Server
- */
 export async function create_server() {
-  // 创建一个 server 对象
-  const server = http.createServer(async (request, response) => { // 每一条请求都会调用这个函数
+
+  const server = http.createServer(async (request, response) => {
     parse_request(request);
     let body;
     try {
@@ -35,11 +32,11 @@ export async function create_server() {
 }
 
 /**
- * 启动 Server
+ * start Server
  */
 export async function boot() {
   const server = await create_server();
-  // 监听端口，不然无法与客户端通信
+
   const { host, port } = app_config;
   server.listen(port, host);
   console.log(`Server is alive at: http://${host}:${port}`);

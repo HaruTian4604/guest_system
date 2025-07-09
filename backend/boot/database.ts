@@ -1,21 +1,11 @@
-import { Connection } from 'mysql2';
-import { createConnection } from 'mysql2/promise';
+import mysql from 'mysql2/promise';
 
-let connection: Connection;
-
-/**
- * 返回数据库连接
- */
-export async function create_connection(): Promise<Connection> {
-  if ( ! connection) {
-    // @ts-ignore
-    connection = await createConnection({
-      host: '0.0.0.0',
-      user: 'root',
-      password: '12341234',
-      database: 'bookshelf',
-    });
-  }
-
-  return connection;
+export async function get_connection() {
+  return await mysql.createConnection({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '12341234',
+    database: process.env.DB_NAME || 'guest_management',
+    port: parseInt(process.env.DB_PORT || '3306')
+  });
 }
