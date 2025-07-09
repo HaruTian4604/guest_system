@@ -29,19 +29,6 @@ async function boot() {
   })
 }
 
-// async function list_and_render() {
-//   try {
-//     const r = await admin.list('guest', list_args)
-//     if (r && r.data) {
-//       rows = r.data
-//       total = r.total
-//       await render_table(rows)
-//     }
-//   } catch (error) {
-//     console.error('Error loading guests:', error)
-//     yo_error('Failed to load guests')
-//   }
-// }
 
 async function list_and_render() {
   try {
@@ -234,13 +221,4 @@ function validateDob(dob) {
   // Validate DD-MM-YYYY format
   const regex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/
   return regex.test(dob)
-}
-
-function highlight_current_page(pager) {
-  document.querySelectorAll('.page-item').forEach(item => {
-    item.classList.remove('active')
-    if (item.dataset.page === String(pager.current)) {
-      item.classList.add('active')
-    }
-  })
 }

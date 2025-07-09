@@ -1,8 +1,12 @@
 .sidebar a {
   display: block;
   padding: .5rem .3rem;
+  text-decoration: none;
 }
-
+.sidebar a.active{
+  color: #fff;
+  background-color: var(--bs-blue);
+}
 #topbar {
   margin-bottom: 1rem;
 }
@@ -23,8 +27,8 @@ h2 {
   margin-left: .5rem;
 }
 .badge{
-  background-color: orange;
+  background-color: var(--bs-warning);
 }
 .badge.badge-success{
-  background-color: green;
+  background-color: var(--bs-success);
 }

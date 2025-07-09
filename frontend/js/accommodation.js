@@ -212,12 +212,3 @@ function validatePostcode(postcode) {
   const regex = /^[A-Za-z]{1,2}\d{1,2}[A-Za-z]?\s?\d[A-Za-z]{2}$/i
   return regex.test(postcode)
 }
-
-function highlight_current_page(pager) {
-  document.querySelectorAll('.page-item').forEach(item => {
-    item.classList.remove('active')
-    if (item.dataset.page === String(pager.current)) {
-      item.classList.add('active')
-    }
-  })
-}
