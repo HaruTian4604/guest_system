@@ -4,7 +4,7 @@ import { get_connection } from '../../boot/database';
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 export class Guest extends Base {
   static table = 'guests';
-  static searchable: string[] = ['full_name','status'];
+  static searchable: string[] = ['full_name', 'status'];
   static fillable: string[] = ['full_name', 'date_of_birth', 'status'];
   static statuses: string[] = ['placed', 'unplaced'];
 
@@ -56,6 +56,16 @@ export class Guest extends Base {
     }
   }
 
+  static async archive(id: number): Promise<void> {
+    if (!id) throw new Invalid_argument('ID is required');
+    const conn = await get_connection();
+    try {
+      await conn.query(`UPDATE ${this.table} SET archived = TRUE WHERE id = ?`, [id]);
+    } finally {
+      conn.end();
+    }
+  }
+
   static async update(partial: any): Promise<any> {
     if (!partial.id) throw new Invalid_argument('ID is required');
     this.validate(partial);
@@ -74,36 +84,36 @@ export class Guest extends Base {
     }
   }
 
-// guest.ts
-static async list(
-  page = 1,
-  limit = 15,
-  order_by = 'id',
-  desc = false,
-  keyword?: string
-): Promise<any[]> {
-  const conn = await get_connection();
-  try {
-    let query = `SELECT * FROM ${this.table}`;
-    const params: any[] = [];
+  static async list(
+    page = 1,
+    limit = 15,
+    order_by = 'id',
+    desc = false,
+    keyword?: string
+  ): Promise<any[]> {
+    const conn = await get_connection();
+    try {
+      let query = `SELECT * FROM ${this.table} WHERE archived = FALSE`;
 
-    if (keyword) {
-      query += ` WHERE full_name LIKE ? OR status LIKE ?`;
-      params.push(`%${keyword}%`, `%${keyword}%`);
+      const params: any[] = [];
+
+      if (keyword) {
+        query += ` WHERE full_name LIKE ? OR status LIKE ?`;
+        params.push(`%${keyword}%`, `%${keyword}%`);
+      }
+
+      query += ` ORDER BY ${order_by} ${desc ? 'DESC' : 'ASC'}`;
+
+      const offset = (page - 1) * limit;
+      query += ` LIMIT ${limit} OFFSET ${offset}`;
+
+      // console.log('Guest List Query:', query); // debug log
+      const [rows] = await conn.query<RowDataPacket[]>(query, params);
+      return rows;
+    } finally {
+      conn.end();
     }
-
-    query += ` ORDER BY ${order_by} ${desc ? 'DESC' : 'ASC'}`;
-
-    const offset = (page - 1) * limit;
-    query += ` LIMIT ${limit} OFFSET ${offset}`;
-
-    // console.log('Guest List Query:', query); // debug log
-    const [rows] = await conn.query<RowDataPacket[]>(query, params);
-    return rows;
-  } finally {
-    conn.end();
   }
-}
 
   static async pick(id: number): Promise<any> {
     const conn = await get_connection();

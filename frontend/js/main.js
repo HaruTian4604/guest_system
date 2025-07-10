@@ -46,11 +46,42 @@ function form2value(form) {
 /**
  * 数据转表单 <form> <-- {...}
  */
+// function value2form(row, form = form_main) {
+//   for (let key in row) {
+//     const value = row[key]
+//     const input = form.querySelector(`[name="${key}"]`)
+//     input.value = value
+//   }
+// }
 function value2form(row, form = form_main) {
-  for (let key in row) {
-    const value = row[key]
-    const input = form.querySelector(`[name="${key}"]`)
-    input.value = value
+  // 1. 处理特殊搜索字段
+  if (typeof guest_search !== 'undefined' && row.guest_full_name) {
+    guest_search.value = row.guest_full_name;
+  }
+
+  if (typeof host_search !== 'undefined' && row.host_full_name) {
+    host_search.value = row.host_full_name;
+  }
+
+  if (typeof accommodation_search !== 'undefined' && row.accommodation_address) {
+    accommodation_search.value = row.accommodation_address;
+    if (row.accommodation_postcode) {
+      accommodation_search.value += ` (${row.accommodation_postcode})`;
+    }
+  }
+
+  // 2. 处理常规表单字段
+  const inputs = form.querySelectorAll('[name]');
+  for (let input of inputs) {
+    const key = input.name;
+    if (row.hasOwnProperty(key)) {
+      input.value = row[key];
+    }
+  }
+
+  // 3. 处理状态选择框
+  if (row.status && status_select) {
+    status_select.value = row.status;
   }
 }
 

@@ -9,6 +9,16 @@ export const accommodation_create = async (req, res) => {
   }
 };
 
+export const accommodation_archive = async (req, res) => {
+  try {
+    const id = req.$query.id;
+    await Accommodation.archive(id);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+};
+
 export const accommodation_delete = async (req, res) => {
   try {
     const id = req.$query.id;

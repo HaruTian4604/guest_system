@@ -60,7 +60,7 @@ function render_table(list) {
       <td>
         <div class="op btn-group">
           <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
-          <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
+          <button type="button" class="op_archive btn btn-outline-secondary btn-sm">Archive</button>
         </div>
       </td>
     `;
@@ -83,13 +83,13 @@ function render_table(list) {
           admin.value2form(row);
         }
 
-        if (e.target.classList.contains('op_delete')) {
-          if (!confirm('Are you sure you want to delete this host?')) return;
+        if (e.target.classList.contains('op_archive')) {
+          if (!confirm('Are you sure you want to archive this host?')) return;
 
-          const r = await api('host/delete', { id });
+          const r = await api('host/archive', { id });
           if (r.ok) {
             await list_and_render();
-            yo_success('Host deleted successfully');
+            yo_success('Host archived successfully');
           }
         }
       }

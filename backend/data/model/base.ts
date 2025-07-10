@@ -68,6 +68,21 @@ export class Base {
   }
 
   /**
+   * Archive a record
+   * @param id
+   */
+  static async archive(id: number): Promise<void> {
+    if (!id) { throw new Invalid_argument('ID parameter is required'); }
+
+    const conn = await get_connection();
+    try {
+      await conn.query(`UPDATE ${this.type} SET deleted = TRUE WHERE id = ?`, [id]);
+    } finally {
+      conn.end();
+    }
+  }
+
+  /**
    * Update a record
    * @param partial
    */

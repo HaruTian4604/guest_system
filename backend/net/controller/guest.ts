@@ -9,6 +9,16 @@ export const guest_create = async (req, res) => {
   }
 };
 
+export const guest_archive = async (req, res) => {
+  try {
+    const id = req.$query.id;
+    await Guest.archive(id);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+};
+
 export const guest_delete = async (req, res) => {
   try {
     const id = req.$query.id;

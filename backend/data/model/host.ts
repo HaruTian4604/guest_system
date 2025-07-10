@@ -45,6 +45,16 @@ export class Host extends Base {
     }
   }
 
+  static async archive(id: number): Promise<void> {
+    if (!id) throw new Invalid_argument('ID is required');
+    const conn = await get_connection();
+    try {
+      await conn.query(`UPDATE ${this.table} SET archived = TRUE WHERE id = ?`, [id]);
+    } finally {
+      conn.end();
+    }
+  }
+
   static async update(partial: any): Promise<any> {
     if (!partial.id) throw new Invalid_argument('ID is required');
     this.validate(partial);
@@ -72,7 +82,7 @@ export class Host extends Base {
   ): Promise<any[]> {
     const conn = await get_connection();
     try {
-      let query = `SELECT * FROM ${this.table}`;
+      let query = `SELECT * FROM ${this.table} WHERE archived = FALSE`;
       const params: any[] = [];
 
       if (keyword) {
@@ -85,7 +95,7 @@ export class Host extends Base {
       const offset = (page - 1) * limit;
       query += ` LIMIT ${limit} OFFSET ${offset}`;
 
-    //   console.log('Host List Query:', query); // debug log
+      //   console.log('Host List Query:', query); // debug log
 
       const [rows] = await conn.query<RowDataPacket[]>(query, params);
       return rows;

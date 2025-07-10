@@ -9,6 +9,16 @@ export const host_create = async (req, res) => {
   }
 };
 
+export const host_archive = async (req, res) => {
+  try {
+    const id = req.$query.id;
+    await Host.archive(id);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+};
+
 export const host_delete = async (req, res) => {
   try {
     const id = req.$query.id;

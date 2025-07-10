@@ -48,6 +48,17 @@ export class Accommodation extends Base {
     }
   }
 
+  static async archive(id: number): Promise<void> {
+    if (!id) throw new Invalid_argument('ID is required');
+    const conn = await get_connection();
+    try {
+      await conn.query(`UPDATE ${this.table} SET archived = TRUE WHERE id = ?`, [id]);
+    } finally {
+      conn.end();
+    }
+  }
+
+
   static async update(partial: any): Promise<any> {
     if (!partial.id) throw new Invalid_argument('ID is required');
     this.validate(partial);
@@ -75,9 +86,7 @@ export class Accommodation extends Base {
   ): Promise<any[]> {
     const conn = await get_connection();
     try {
-      let query = `SELECT a.*, h.full_name AS host_full_name
-                  FROM ${this.table} AS a
-                  LEFT JOIN hosts AS h ON a.host_id = h.id`;
+      let query = `SELECT * FROM ${this.table} WHERE archived = FALSE`;
       const params: any[] = [];
 
       if (keyword) {
