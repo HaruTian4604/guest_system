@@ -1,9 +1,11 @@
 import { Invalid_argument } from '../../error/invalid_argument';
 import { Base } from './base';
+import { ModelType } from '../utility';
 import { get_connection } from '../../boot/database';
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 export class Guest extends Base {
   static table = 'guests';
+  static type: ModelType = 'guests';
   static searchable: string[] = ['full_name', 'status'];
   static fillable: string[] = ['full_name', 'date_of_birth', 'status'];
   static statuses: string[] = ['placed', 'unplaced'];
