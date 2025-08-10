@@ -14,7 +14,7 @@ async function list(model, args) {
 async function api(seg, args) {
   const res = await fetch(`http://localhost:8080/api/${seg}?${to_querystring(args)}`)
   const r = await res.json()
-  if (!r.ok) { yo_error(r.message) }
+  if (!r.ok) { yo_error(r.message || r.error || 'Unknown error') }
   return r
 }
 

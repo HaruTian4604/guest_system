@@ -100,7 +100,7 @@ export class Guest extends Base {
       const params: any[] = [];
 
       if (keyword) {
-        query += ` WHERE full_name LIKE ? OR status LIKE ?`;
+        query += ` AND (full_name LIKE ? OR status LIKE ?)`;
         params.push(`%${keyword}%`, `%${keyword}%`);
       }
 
