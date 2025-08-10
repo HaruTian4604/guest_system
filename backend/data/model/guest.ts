@@ -1,7 +1,7 @@
 import { Invalid_argument } from '../../error/invalid_argument';
 import { Base } from './base';
-import { get_connection } from '../../boot/database';
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import { get_connection } from '../../boot/database';
 export class Guest extends Base {
   static table = 'guests';
   static searchable: string[] = ['full_name','status'];

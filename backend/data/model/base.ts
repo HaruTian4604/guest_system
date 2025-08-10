@@ -1,7 +1,6 @@
 import { get_connection } from '../../boot/database';
 import { Invalid_argument } from '../../error/invalid_argument';
 import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
-
 /**
  * Base class
  */
