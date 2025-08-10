@@ -129,4 +129,25 @@ static async list(
       conn.end();
     }
   }
+
+static async getStats(): Promise<{ total: number, placed_count: number, unplaced_count: number }> {
+  const conn = await get_connection();
+  try {
+    const [rows] = await conn.query<RowDataPacket[]>(`
+      SELECT
+        COUNT(*) AS total,
+        SUM(status = 'placed') AS placed_count,
+        SUM(status = 'unplaced') AS unplaced_count
+      FROM ${this.table}
+      WHERE archived = 0
+    `);
+    return {
+      total: rows[0].total,
+      placed_count: rows[0].placed_count || 0,
+      unplaced_count: rows[0].unplaced_count || 0
+    };
+  } finally {
+    conn.end();
+  }
+}
 }

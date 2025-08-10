@@ -60,3 +60,12 @@ export const guest_pick = async (req, res) => {
     return { ok: false, error: error.message };
   }
 };
+
+export const guest_stats = async (req, res) => {
+  try {
+    const stats = await Guest.getStats();
+    return { ok: true, ...stats };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+};
