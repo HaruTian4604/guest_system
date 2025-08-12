@@ -1,8 +1,22 @@
+:root {
+  --primary-status-color: green;
+  --secondary-status-color: orange;
+  --third-status-color: purple;
+  --main-color:#007bff;
+}
+.navbar{
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
 .sidebar a {
   display: block;
   padding: .5rem .3rem;
 }
-
+.sidebar a.active{
+  background-color: var(--main-color);
+  color: #fff;
+  text-decoration-line: none;
+}
 #topbar {
   margin-bottom: 1rem;
 }
@@ -23,22 +37,27 @@ h2 {
   margin-left: .5rem;
 }
 .badge{
-  background-color: orange;
+  background-color: var(--secondary-status-color);
 }
 .badge.badge-success{
-  background-color: green;
+  background-color: var(--primary-status-color);
 }
 /* 统计面板样式 */
 .stats-summary {
   margin-bottom: 20px;
 }
-
+.panel{
+  padding: 1rem;
+  border-radius: 1rem;
+  border-color: #555;
+  background-color: #fafafa;
+}
 .stat-item {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #fff;
 }
 
 .stat-label {
@@ -47,7 +66,7 @@ h2 {
 
 .stat-value {
   font-weight: bold;
-  color: #007bff;
+  color: var(--main-color);
 }
 
 /* 图表容器 */
