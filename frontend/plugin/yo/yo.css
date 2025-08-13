@@ -2,13 +2,20 @@
   display: none !important;
 }
 
-.yo {
+/* .yo {
   max-width: 350px;
   position: fixed;
   top: 1rem;
   right: 1rem;
-}
+} */
 
+.yo {
+  max-width: 350px;
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
 .yo-container {
   background: #fff;
   padding: .3rem .5rem;
