@@ -44,8 +44,9 @@ function createUserSwitch(users) {
     // 切换用户
 async function switchUser(token) {
   try {
-    const resp = await api(`user/current?token=${token}`);
-    const data = resp?.json ? await resp.json() : resp; // 兼容两种返回
+    // const resp = await api(`user/current?token=${token}`);
+    // const data = resp?.json ? await resp.json() : resp; // 兼容两种返回
+    const data = await api('user/current', { token });
     const { ok, user } = data;
 
     if (ok) {
@@ -81,7 +82,7 @@ async function initUserSwitch() {
     }
 
     // 2) 拉取列表（兼容两种 api 返回）
-    const resp = await api('user/list');
+    const resp = await api('user/list',{});
     const users = Array.isArray(resp) ? resp : await resp.json?.();
 
     const navbar = document.getElementById('topbar');

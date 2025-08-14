@@ -92,9 +92,9 @@ export async function parse_route(request, response) {
  */
 export function get_current_user(token: string) {
   const user = find_user_by_token(token);
-  console.log(user);
+  // console.log(user);
   if (!user) {
-    return { ok: false, error: 'Invalid token' };
+    return { ok: false, error: 'Invalid user token' };
   }
   return { ok: true, user };
 }

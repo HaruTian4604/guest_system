@@ -4,18 +4,44 @@
 async function list(model, args) {
   return api(model + '/list', args)
 }
-
+// 安全的 query 序列化
+function to_querystring(obj = {}) {
+  return Object.entries(obj)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+}
 /**
  * use api interface
  * @param seg
  * @param args
  * @returns {Promise<void>}
  */
-async function api(seg, args) {
-  const res = await fetch(`http://localhost:8080/api/${seg}?${to_querystring(args)}`)
-  const r = await res.json()
-  if (!r.ok) { yo_error(`Something is wrong: ${r.message}`,r.message) }
-  return r
+// async function api(seg, args) {
+//   const res = await fetch(`http://localhost:8080/api/${seg}?${to_querystring(args)}`)
+//   const r = await res.json()
+//   if (!r.ok) { yo_error(`Something is wrong: ${r.message}`,r.message) }
+//   console.log(res)
+//   return r
+// }
+async function api(seg, args = {}) {
+  try {
+    const qs = to_querystring(args);
+    const url = `http://localhost:8080/api/${seg}${qs ? `?${qs}` : ''}`;
+
+    const res = await fetch(url);
+    // 防御：有些接口可能没有 JSON（虽少见）
+    let r = {};
+    try { r = await res.json(); } catch (_) { /* ignore */ }
+
+    // 只有当服务端明确给了 ok:false 才提示错误
+    if (r && typeof r.ok === 'boolean' && !r.ok) {
+      yo_error(`Something is wrong: ${r.message || 'Unknown error'}`, r.message);
+    }
+    return r;
+  } catch (err) {
+    yo_error(`Network error: ${err.message}`);
+    throw err;
+  }
 }
 
 

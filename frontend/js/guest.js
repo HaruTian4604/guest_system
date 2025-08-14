@@ -57,7 +57,7 @@ async function list_and_render() {
       await render_table(rows);
     }
   } catch (error) {
-    console.error('Error loading guests:', error);
+    console.error('Failed to load guests:', error);
     yo_error('Failed to load guests');
   }
 }
