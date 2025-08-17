@@ -16,34 +16,35 @@ function to_querystring(obj = {}) {
  * @param args
  * @returns {Promise<void>}
  */
-// async function api(seg, args) {
-//   const res = await fetch(`http://localhost:8080/api/${seg}?${to_querystring(args)}`)
-//   const r = await res.json()
-//   if (!r.ok) { yo_error(`Something is wrong: ${r.message}`,r.message) }
-//   console.log(res)
-//   return r
-// }
+
 async function api(seg, args = {}) {
   try {
+    const token = window.userAuth?.getCurrentUserToken();
+    // console.log("api/token: ",token)
+    const headers = {
+      'X-Auth-Token': token || ''
+    };
+    // console.log("headers: ",headers)
+
     const qs = to_querystring(args);
     const url = `http://localhost:8080/api/${seg}${qs ? `?${qs}` : ''}`;
 
-    const res = await fetch(url);
-    // 防御：有些接口可能没有 JSON（虽少见）
+    const res = await fetch(url, { headers });
     let r = {};
-    try { r = await res.json(); } catch (_) { /* ignore */ }
+    try {
+      r = await res.json();
+    } catch (_) { /* ignore */ }
 
-    // 只有当服务端明确给了 ok:false 才提示错误
     if (r && typeof r.ok === 'boolean' && !r.ok) {
-      yo_error(`Something is wrong: ${r.message || 'Unknown error'}`, r.message);
+      yo_error(`API error: ${r.message || 'Unknown error'}`, r.message);
     }
+
     return r;
   } catch (err) {
     yo_error(`Network error: ${err.message}`);
     throw err;
   }
 }
-
 
 /**
  * 通过id找到一条数据

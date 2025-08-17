@@ -116,6 +116,8 @@ function render_table(list) {
           if (r.ok) {
             await list_and_render()
             yo_success('Guest deleted successfully')
+          }else{
+            yo_error(r.error)
           }
         }
       }

@@ -1,119 +1,135 @@
-// js/userswitch.js
+// frontend/js/userswitch.js
 (function () {
-    // 当前用户状态
-    let currentUser = {
-        token: '5358979',
-        // role: 'user'
-    };
+  // 当前用户状态，初始化时只有 token
+  const TWO_DEMO_USERS = [
+    { name: 'iamadmin', token: '1415926' },
+    { name: 'iamcaseworker', token: '5358979' },
+  ];
 
-function createUserSwitch(users) {
-  const container = document.createElement('div');
-  container.className = 'ms-auto';
-  container.id = 'user-switch-container';
+  let currentUser = { token: '5358979' };
 
-  const group = document.createElement('div');
-  group.className = 'btn-group';
-  group.setAttribute('role', 'group');
-  group.setAttribute('aria-label', 'User switch');
+  // 创建用户切换界面
+  function createDemoUserSwitch(users) {
+    const container = document.createElement('div');
+    container.className = 'ms-auto';
+    container.id = 'user-switch-container';
 
-  users.forEach(user => {
-    const radioId = `user-radio-${user.token}`;
+    const group = document.createElement('div');
+    group.className = 'btn-group';
+    group.setAttribute('role', 'group');
+    group.setAttribute('aria-label', 'User switch');
 
-    const radio = document.createElement('input');
-    radio.type = 'radio';
-    radio.className = 'btn-check';
-    radio.name = 'user-switch';
-    radio.id = radioId;
-    radio.autocomplete = 'off';
-    radio.value = user.token;
-    radio.checked = user.token === currentUser.token;
-    radio.addEventListener('change', () => switchUser(user.token));
+    users.forEach(user => {
+      const radioId = `user-radio-${user.token}`;
 
-    const label = document.createElement('label');
-    label.className = 'btn btn-outline-primary';
-    label.htmlFor = radioId;
-    label.textContent = user.name;
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.className = 'btn-check';
+      radio.name = 'user-switch';
+      radio.id = radioId;
+      radio.autocomplete = 'off';
+      radio.value = user.token;
 
-    group.appendChild(radio);
-    group.appendChild(label);
-  });
-
-  container.appendChild(group);
-  return container;
-}
-    // 切换用户
-async function switchUser(token) {
-  try {
-    // const resp = await api(`user/current?token=${token}`);
-    // const data = resp?.json ? await resp.json() : resp; // 兼容两种返回
-    const data = await api('user/current', { token });
-    const { ok, user } = data;
-
-    if (ok) {
-      currentUser = user;
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      yo_success(`Hello ${user.name}`);
-    }
-  } catch (error) {
-    yo_error('Cannot switch user:', error);
-  }
-}
-
-// 初始化
-async function initUserSwitch() {
-  try {
-    // 1) 读本地并容错解析
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      try {
-        currentUser = JSON.parse(storedUser);
-      } catch (e) {
-        // 兼容旧历史：把 'iamuser' / 'iamadmin' 迁移为对象，并回写
-        if (storedUser === 'iamuser') {
-          currentUser = { token: '5358979', name: 'iamuser', role: 'user' };
-        } else if (storedUser === 'iamadmin') {
-          currentUser = { token: '31415926', name: 'iamadmin', role: 'admin' };
-        } else {
-          // 最保守：只知道是个 token
-          currentUser = { token: storedUser };
-        }
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      // 检查当前用户是否匹配
+      if (user.token === currentUser.token) {
+        radio.checked = true;
       }
-    }
 
-    // 2) 拉取列表（兼容两种 api 返回）
-    const resp = await api('user/list',{});
-    const users = Array.isArray(resp) ? resp : await resp.json?.();
+      // 只传递 token 到 switchUser 函数
+      radio.addEventListener('change', () => switchUser(user.token));
 
-    const navbar = document.getElementById('topbar');
-    if (navbar) navbar.appendChild(createUserSwitch(users));
-  } catch (error) {
-   yo_error('Cannot initialise user:', error);
+      const label = document.createElement('label');
+      label.className = 'btn btn-outline-primary';
+      label.htmlFor = radioId;
+      label.textContent = user.name;
+      label.dataset.token = user.token;       // <-- 你要的“btn 携带 token”
+      label.title = `user name: ${user.name}\nRole: ${user.roleName}\nToken: ${user.token}`; //鼠标悬停可见
+      group.appendChild(radio);
+      group.appendChild(label);
+    })
+
+    container.appendChild(group);
+    return container;
   }
-}
 
-    // 获取当前用户token (供其他模块使用)
-    function getCurrentUserToken() {
-        return currentUser.token;
+  // 切换用户（只接受 token 参数）
+  async function switchUser(token) {
+    try {
+      // 通过 API 获取完整的用户信息
+      const response = await api('user/find', { token });
+      // console.log("switchUser response: ", response);
+      // console.log("switchUser token: ", token);
+      if (response && response.ok && response.user) {
+        // 更新当前用户信息（包括 roleName）
+        currentUser = {
+          token: response.user.token,
+          name: response.user.name,
+          roleName: response.user.roleName,
+        };
+
+        // 保存到本地存储
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        yo_success(`Hello ${response.user.name}`);
+      } else {
+        yo_error('Failed to switch user: ' + (response?.error || 'Unknown error'));
+      }
+    } catch (error) {
+      yo_error('Cannot switch user:', error);
     }
+  }
 
-    // 检查是否是管理员
-    function isAdmin() {
-        return currentUser.role === 'admin';
-    }
+  // 初始化用户切换组件
+  async function initUserSwitch() {
+    try {
+      // 1. 尝试从本地存储加载用户（如果有）
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        currentUser = JSON.parse(storedUser);
+        console.log("currentUser: ", currentUser);
+      }
 
-    // 暴露接口
-    window.userAuth = {
-        getCurrentUserToken,
-        isAdmin,
-        // 供请求时添加认证头
-        withAuth: async (options = {}) => {
-            options.headers = options.headers || {};
-            options.headers['X-Auth-Token'] = getCurrentUserToken();
-            return options;
+      // 2. 获取用户列表
+      // const resp = await api('user/list');
+      // const users = Array.isArray(resp) ? resp : (resp.data || []);
+
+      // 3. 如果当前用户信息不完整，通过 API 获取完整信息
+      if (currentUser.token && (!currentUser.roleName || !currentUser.name || !currentUser.roleName == '' || !currentUser.name == '')) {
+        const userInfo = await api('user/find', { token: currentUser.token });
+        if (userInfo.ok) {
+          currentUser = {
+            token: userInfo.user.token,
+            name: userInfo.user.name,
+            roleName: userInfo.user.roleName,
+          };
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
-    };
+      }
 
-    // 初始化
-    document.addEventListener('DOMContentLoaded', initUserSwitch);
+      // 4. 创建并添加用户切换界面
+      const navbar = document.getElementById('topbar');
+      if (navbar) {
+        navbar.appendChild(createDemoUserSwitch(TWO_DEMO_USERS));
+      }
+    } catch (error) {
+      yo_error('Cannot initialize user switch:', error);
+    }
+  }
+
+  // 获取当前用户 token（供其他模块使用）
+  function getCurrentUserToken() {
+    return currentUser.token;
+  }
+
+  // 暴露接口
+  window.userAuth = {
+    getCurrentUserToken,
+    withAuth: (options = {}) => {
+      options.headers = options.headers || {};
+      options.headers['X-Auth-Token'] = getCurrentUserToken();
+      return options;
+    }
+  };
+
+  // 初始化
+  document.addEventListener('DOMContentLoaded', initUserSwitch);
 })();

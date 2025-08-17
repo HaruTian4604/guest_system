@@ -5,31 +5,42 @@ import { parse_request, parse_route } from '../net/request';
 const http = require('http');
 
 export async function create_server() {
-
   const server = http.createServer(async (request, response) => {
-    parse_request(request);
-    let body;
-    try {
-      body = await parse_route(request, response);
-    } catch (e) {
-      body = { ok: false };
-      if (e instanceof Invalid_argument) {
-        body.message = e.message;
-        response.statusCode = 400;
-      } else {
-        body.message = 'Internal error';
-        response.statusCode = 500;
-      }
-
-      response.setHeader('content-type', 'application/json');
-      body = JSON.stringify(body);
+    // ---- CORS 统一处理（含预检）----
+    response.setHeader('Access-Control-Allow-Origin', '*')
+    response.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
+    response.setHeader('Access-Control-Allow-Headers', 'Content-Type,X-Auth-Token')
+    if (request.method === 'OPTIONS') {
+      response.statusCode = 204
+      response.end()
+      return
     }
+    // --------------------------------
 
-    response.setHeader('access-control-allow-origin', '*');
-    response.end(body);
-  });
-  return server;
+    parse_request(request)
+    try {
+      let body = await parse_route(request, response)
+      if (typeof body !== 'string') {
+        response.setHeader('content-type', 'application/json')
+        body = JSON.stringify(body)
+      }
+      response.end(body)
+    } catch (e) {
+      const out: any = { ok: false }
+      if (e instanceof Invalid_argument) {
+        out.message = e.message
+        response.statusCode = 400
+      } else {
+        out.message = 'Internal error'
+        response.statusCode = 500
+      }
+      response.setHeader('content-type', 'application/json')
+      response.end(JSON.stringify(out))
+    }
+  })
+  return server
 }
+
 
 /**
  * start Server
