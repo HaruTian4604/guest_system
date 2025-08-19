@@ -116,8 +116,30 @@ function render_table(list) {
           if (r.ok) {
             await list_and_render()
             yo_success('Guest deleted successfully')
-          }else{
-            yo_error(r.error)
+          } else {
+            // yo_error(r.error)
+            if (r.error.includes('foreign key constraint')) {
+              const regex = /foreign key constraint fails \(`([\w]+)`\.`([\w]+)`, CONSTRAINT `([\w]+)`/;
+              const match = r.error.match(regex);
+
+              if (match && match[2] && match[1]) {
+                const table = match[2]; // `placements`
+                // const constraint = match[3]; // `placements_ibfk_1`
+                yo_error(`Cannot delete the guest. Because it is linked to a [${table}] record. Please handle that then try again.`);
+              } else {
+                yo_error('Cannot delete the guest due to foreign key constraint.');
+              }
+            } else if (r.error.includes('not found')) {
+              yo_error('The guest record does not exist.');
+            } else if (r.error.includes('incorrect integer value')) {
+              yo_error('Invalid guest ID. Please try again.');
+            } else if (r.error.includes('permission denied')) {
+              yo_error('You do not have permission to delete this guest.');
+            } else if (r.error.includes('deadlock')) {
+              yo_error('A conflict occurred while processing your request. Please try again later.');
+            } else {
+              yo_error(`Error: ${r.error}`); // Default error handling
+            }
           }
         }
       }

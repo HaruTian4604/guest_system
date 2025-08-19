@@ -85,7 +85,7 @@
       const storedUser = localStorage.getItem('currentUser');
       if (storedUser) {
         currentUser = JSON.parse(storedUser);
-        console.log("currentUser: ", currentUser);
+        // console.log("currentUser: ", currentUser);
       }
 
       // 2. 获取用户列表

@@ -34,9 +34,9 @@ async function api(seg, args = {}) {
     try {
       r = await res.json();
     } catch (_) { /* ignore */ }
-
+    console.log(r);
     if (r && typeof r.ok === 'boolean' && !r.ok) {
-      yo_error(`API error: ${r.message || 'Unknown error'}`, r.message);
+      yo_error(`API error: ${r.error || 'Unknown error'}`,'');
     }
 
     return r;
