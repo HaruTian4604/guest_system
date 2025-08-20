@@ -139,7 +139,7 @@ static async getStats(): Promise<{ total: number, placed_count: number, unplaced
         SUM(status = 'placed') AS placed_count,
         SUM(status = 'unplaced') AS unplaced_count
       FROM ${this.table}
-      WHERE archived = 0
+       WHERE archived = 0 OR archived IS NULL
     `);
     return {
       total: rows[0].total,

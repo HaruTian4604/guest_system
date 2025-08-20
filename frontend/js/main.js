@@ -16,7 +16,6 @@ function to_querystring(obj = {}) {
  * @param args
  * @returns {Promise<void>}
  */
-
 async function api(seg, args = {}) {
   try {
     const token = window.userAuth?.getCurrentUserToken();
@@ -34,18 +33,21 @@ async function api(seg, args = {}) {
     try {
       r = await res.json();
     } catch (_) { /* ignore */ }
-    console.log(r);
+    // console.log(r);
     if (r && typeof r.ok === 'boolean' && !r.ok) {
-      yo_error(`API error: ${r.error || 'Unknown error'}`,'');
+      if (!r.ok) {
+        yo_error(`API error: ${r.error || 'Unknown error'}`, '');
+      }
+      return r; // 确保在成功和已知错误时都返回响应
     }
 
     return r;
   } catch (err) {
     yo_error(`Network error: ${err.message}`);
-    throw err;
+    // throw err;
+    return { ok: false, error: err.message };
   }
 }
-
 /**
  * 通过id找到一条数据
  * @param id
@@ -74,14 +76,25 @@ function form2value(form) {
 /**
  * 数据转表单 <form> <-- {...}
  */
+// function value2form(row, form = form_main) {
+//   for (let key in row) {
+//     const value = row[key]
+//     const input = form.querySelector(`[name="${key}"]`)
+//     input.value = value
+//   }
+// }
 function value2form(row, form = form_main) {
-  for (let key in row) {
-    const value = row[key]
-    const input = form.querySelector(`[name="${key}"]`)
-    input.value = value
+  const requiredInput = ['full_name', 'date_of_birth', 'status'];
+
+  for (let key of requiredInput) {
+    if (row.hasOwnProperty(key)) {
+      const input = form.querySelector(`[name="${key}"]`)
+      if (input) {
+        input.value = row[key]
+      }
+    }
   }
 }
-
 /**
  * {a: 1, b: 2} --> "a=1&b=2"
  */
