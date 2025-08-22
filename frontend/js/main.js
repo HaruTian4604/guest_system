@@ -73,16 +73,6 @@ function form2value(form) {
   return row
 }
 
-/**
- * 数据转表单 <form> <-- {...}
- */
-// function value2form(row, form = form_main) {
-//   for (let key in row) {
-//     const value = row[key]
-//     const input = form.querySelector(`[name="${key}"]`)
-//     input.value = value
-//   }
-// }
 function value2form(row, form = form_main) {
   const requiredInput = ['id','full_name', 'date_of_birth', 'status'];
 

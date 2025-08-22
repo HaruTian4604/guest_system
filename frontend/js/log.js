@@ -89,38 +89,62 @@
         }
     }
 
-// log.js -> show_log_details(log)
-function show_log_details(log) {
-  const modal = document.createElement('div');
-  modal.className = 'modal fade';
-  modal.innerHTML = `
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Log Details #${log.id}</h5>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <pre>${JSON.stringify(log.changes, null, 2)}</pre>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  `;
+    function show_log_details(log) {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Log Details #${log.id}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <pre>${JSON.stringify(log.changes, null, 2)}</pre>
+                </div>
+            </div>
+            </div>
+        `;
 
-  document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-  const bsModal = new bootstrap.Modal(modal);
-  bsModal.show();
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
 
-  // ⭐ 监听关闭事件并移除节点（同样不用 jQuery）
-  modal.addEventListener('hidden.bs.modal', () => {
-    document.body.removeChild(modal);
-  });
-}
+        modal.addEventListener('hidden.bs.modal', () => {
+            document.body.removeChild(modal);
+        });
+    }
 
+    // function show_log_details(log) {
+    //     const modal = document.createElement('div');
+    //     modal.className = 'modal fade';
+    //     modal.innerHTML = `
+    //         <div class="modal-dialog modal-lg">
+    //         <div class="modal-content">
+    //             <div class="modal-header">
+    //             <h5 class="modal-title">Log Details #${log.id}</h5>
+    //             <button type="button" class="close" data-dismiss="modal">&times;</button>
+    //             </div>
+    //             <div class="modal-body">
+    //             <pre>${JSON.stringify(log.changes, null, 2)}</pre>
+    //             </div>
+    //             <div class="modal-footer">
+    //             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+    //             </div>
+    //         </div>
+    //         </div>
+    //     `;
+
+    //     document.body.appendChild(modal);
+
+    //     const bsModal = new bootstrap.Modal(modal);
+    //     bsModal.show();
+
+    //     modal.addEventListener('hidden.bs.modal', () => {
+    //         document.body.removeChild(modal);
+    //     });
+    // }
 
     function listen() {
         form_search.addEventListener('submit', async e => {
