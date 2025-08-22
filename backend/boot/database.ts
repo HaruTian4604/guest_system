@@ -1,6 +1,6 @@
-import mysql from 'mysql2/promise';
+import mysql, { type Connection } from 'mysql2/promise';
 
-export async function get_connection() {
+export async function get_connection(): Promise<Connection> {
   return await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',

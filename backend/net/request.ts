@@ -2,6 +2,13 @@ import { decode } from 'querystring';
 import { route } from './route';
 import { findUserByToken } from '../data/user/UserRepository';
 
+import { AsyncLocalStorage } from 'node:async_hooks';
+const RequestContext = new AsyncLocalStorage<{ user?: any }>();
+
+export function getCurrentUser() {
+  return RequestContext.getStore()?.user;
+}
+
 export function parse_request(request: any) {
   const url = request.url;// http://localhost:8080/add?a=1&b=2
   const parts = url.split('?'); // ['/add', 'a=1&b=2']
@@ -59,7 +66,10 @@ export async function parse_route(request, response) {
         body = def;
         break;
       case 'function':
-        body = await def(request, response);
+        // body = await def(request, response);
+        body = await RequestContext.run({ user: request.$user }, async () => {
+          return await def(request, response);
+        });
         break;
     }
   }
