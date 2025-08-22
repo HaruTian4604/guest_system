@@ -35,7 +35,7 @@ export const guest_list = async (req, res) => {
     const page = parseInt(q.page) || 1;
     const limit = parseInt(q.limit) || 15;
     const desc = q.desc === 'true';
-
+    const keyword = q.keyword;
     const r = await Guest.list(
       page,
       limit,
@@ -44,7 +44,8 @@ export const guest_list = async (req, res) => {
       q.keyword
     );
 
-    const total = await Guest.count();
+    // const total = await Guest.count();
+    const total = await Guest.count(keyword);
     return { ok: true, data: r, total };
   } catch (error) {
     return { ok: false, error: error.message };

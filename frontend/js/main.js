@@ -163,6 +163,26 @@ function highlight_current_page(pager) {
   }
 }
 
+function attach_pager_events(containerEl, pager) {
+  containerEl.addEventListener('click', e => {
+    const btn = e.target.closest('.page-item');
+    if (!btn) return;
+
+    const page = btn.dataset.page;
+
+    if (page) {
+      pager.go(page);
+    } else {
+      if (btn.classList.contains('previous')) pager.prev();
+      if (btn.classList.contains('next')) pager.next();
+    }
+
+    highlight_current_page(pager);
+  });
+}
+
+window.attach_pager_events = attach_pager_events; // 导出给页面用
+
 window.api = api
 
 window.admin = {

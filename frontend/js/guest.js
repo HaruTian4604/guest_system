@@ -7,7 +7,7 @@ const form_main_cancel = document.getElementById('form_main_cancel')
 const e_pager = document.getElementById('pager')
 const status_select = document.getElementById('status')
 
-const limit = 5
+const limit = 10
 let rows, total, pager, list_args = { limit }
 
 let state = {
@@ -17,8 +17,8 @@ let state = {
 boot()
 
 async function boot() {
-  listen()
-  await list_and_render()
+  listen();
+  await list_and_render();
   pager = await render_pager(e_pager, {
     total,
     limit,
@@ -26,22 +26,9 @@ async function boot() {
       list_args.page = page
       list_and_render()
     },
-  })
+  });
+  attach_pager_events(e_pager, pager);
 }
-
-// async function list_and_render() {
-//   try {
-//     const r = await admin.list('guest', list_args)
-//     if (r && r.data) {
-//       rows = r.data
-//       total = r.total
-//       await render_table(rows)
-//     }
-//   } catch (error) {
-//     console.error('Error loading guests:', error)
-//     yo_error('Failed to load guests')
-//   }
-// }
 
 async function list_and_render() {
   try {
@@ -225,27 +212,6 @@ function listen() {
 
   })
 
-  e_pager.addEventListener('click', e => {
-    const btn = e.target.closest('.page-item')
-    if (!btn) return
-
-    const page = btn.dataset.page
-
-    if (page) {
-      pager.go(page)
-    } else {
-      if (btn.classList.contains('previous')) {
-        pager.prev()
-      }
-
-      if (btn.classList.contains('next')) {
-        pager.next()
-      }
-    }
-
-    highlight_current_page(pager)
-  })
-
   form_search.addEventListener('submit', async e => {
     e.preventDefault()
     const value = input_search.value.trim()
@@ -260,11 +226,11 @@ function validateDob(dob) {
   return regex.test(dob)
 }
 
-function highlight_current_page(pager) {
-  document.querySelectorAll('.page-item').forEach(item => {
-    item.classList.remove('active')
-    if (item.dataset.page === String(pager.current)) {
-      item.classList.add('active')
-    }
-  })
-}
+// function highlight_current_page(pager) {
+//   document.querySelectorAll('.page-item').forEach(item => {
+//     item.classList.remove('active')
+//     if (item.dataset.page === String(pager.current)) {
+//       item.classList.add('active')
+//     }
+//   })
+// }

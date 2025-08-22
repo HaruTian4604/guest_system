@@ -128,12 +128,24 @@ export class Base {
   /**
    * Get total count of records
    */
-  static async count(): Promise<number> {
+  // static async count(): Promise<number> {
+  //   const conn = await get_connection();
+  //   try {
+  //     const [rows] = await conn.query<RowDataPacket[]>(
+  //       `SELECT COUNT(*) as count FROM ${this.tableName}`
+  //     );
+  //     return rows[0].count as number;
+  //   } finally {
+  //     conn.end();
+  //   }
+  // }
+  static async count(keyword?: string): Promise<number> {
     const conn = await get_connection();
     try {
-      const [rows] = await conn.query<RowDataPacket[]>(
-        `SELECT COUNT(*) as count FROM ${this.tableName}`
-      );
+      let sql = `SELECT COUNT(*) as count FROM ${this.tableName}`;
+      const { where, params } = this._buildKeywordWhere(keyword);
+      sql += where;
+      const [rows] = await conn.query<RowDataPacket[]>(sql, params);
       return rows[0].count as number;
     } finally {
       conn.end();
