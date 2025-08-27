@@ -5,7 +5,7 @@ import { get_connection } from '../../boot/database';
 export class Guest extends Base {
   static tableName = 'guests';
   static searchable: string[] = ['full_name','status'];
-  static fillable: string[] = ['full_name', 'date_of_birth', 'status'];
+static fillable: string[] = ['full_name', 'date_of_birth', 'status', 'note'];
   static statuses: string[] = ['placed', 'unplaced'];
 
   static validate(row: any) {

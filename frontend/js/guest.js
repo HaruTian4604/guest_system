@@ -66,7 +66,7 @@ function render_table(list) {
 
     tr.innerHTML = `
       <td>${it.id}</td>
-      <td>${it.full_name || '-'}</td>
+      <td><a href="guest-detail.html?id=${it.id}">${it.full_name || '-'}</a></td>
       <td>${dob || '-'}</td>
       <td>${age || '-'}</td>
       <td><span class="badge ${it.status === 'placed' ? 'badge-success' : 'badge-warning'}">${it.status}</span></td>

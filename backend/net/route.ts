@@ -1,5 +1,6 @@
 //backend/net/route.ts
 import { guest_create, guest_delete, guest_list, guest_pick, guest_update, guest_stats } from './controller/guest';
+import { placement_list_by_guest } from './controller/placement';
 import { log_list } from './controller/log';
 import { requireRole } from './request';
 import { findUserByToken } from '../data/user/UserRepository';
@@ -22,4 +23,5 @@ export const route = {
   '/api/guest/list': guest_list,
   '/api/guest/pick': guest_pick,
   '/api/guest-stats': guest_stats,
+  '/api/placement/list-by-guest': placement_list_by_guest,
 };
