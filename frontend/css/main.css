@@ -115,3 +115,5 @@ h2 {
   position: relative;
   height: 200px;
 }
+
+#note-content { white-space: pre-wrap; }

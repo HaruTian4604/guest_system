@@ -168,35 +168,24 @@ async function saveNote(guestId, noteContent) {
     const statusElement = document.getElementById('note-status');
 
     try {
-        statusElement.textContent = 'Saving...';
-        statusElement.className = 'mt-2 small text-warning';
-
         const result = await api('guest/update', {
             id: guestId,
             note: noteContent
         });
 
         if (result.ok) {
-            statusElement.textContent = 'Note saved successfully';
-            statusElement.className = 'mt-2 small text-success';
+            yo_success('Note saved successfully', '');
 
             // Update the displayed note
             document.getElementById('note-content').textContent = noteContent || 'No notes available.';
 
-            // Clear status message after 2 seconds
-            setTimeout(() => {
-                statusElement.textContent = '';
-            }, 2000);
-
             return true;
         } else {
-            statusElement.textContent = 'Error: ' + result.error;
-            statusElement.className = 'mt-2 small text-danger';
+            yo_error('Error: ', result.error);
             return false;
         }
     } catch (error) {
-        statusElement.textContent = 'Error: ' + error.message;
-        statusElement.className = 'mt-2 small text-danger';
+        yo_error('Error: ', error.message);
         return false;
     }
 }
@@ -254,11 +243,11 @@ async function initPage() {
 }
 
 function syncNotesHeight() {
-  const gi = document.getElementById('guest-info-card');
-  const notes = document.getElementById('notes-card');
-  if (!gi || !notes) return;
-  // 用 !important 强制覆盖所有高度声明
-  notes.style.setProperty('height', gi.offsetHeight + 'px', 'important');
+    const gi = document.getElementById('guest-info-card');
+    const notes = document.getElementById('notes-card');
+    if (!gi || !notes) return;
+    // 用 !important 强制覆盖所有高度声明
+    notes.style.setProperty('height', gi.offsetHeight + 'px', 'important');
 }
 
 // Start the page when DOM is loaded
