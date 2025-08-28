@@ -62,7 +62,7 @@ function render_table(list) {
     const tr = document.createElement('tr')
     tr.dataset.id = it.id
     const dob = it.date_of_birth || ''
-    const age = calculateAge(dob)
+    const age = Details.calculateAge(dob);
 
     tr.innerHTML = `
       <td>${it.id}</td>
@@ -145,29 +145,6 @@ function hide_form(form) {
 function reset_form(form) {
   form.reset()
   if (status_select) status_select.value = ''
-}
-
-function calculateAge(dob) {
-  if (!dob) return null
-
-  try {
-    // Parse DD-MM-YYYY format
-    const [day, month, year] = dob.split('-').map(Number)
-    const birthDate = new Date(year, month - 1, day)
-    const today = new Date()
-
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const m = today.getMonth() - birthDate.getMonth()
-
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--
-    }
-
-    return age
-  } catch (e) {
-    console.error('Error calculating age:', e)
-    return null
-  }
 }
 
 function listen() {

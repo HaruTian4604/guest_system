@@ -85,18 +85,6 @@ function value2form(row, form = form_main) {
     }
   }
 }
-/**
- * {a: 1, b: 2} --> "a=1&b=2"
- */
-function to_querystring(obj) {
-  let r = ''
-
-  for (let key in obj) {
-    r += `${key}=${obj[key]}&`
-  }
-
-  return r.substring(0, r.length - 1)
-}
 
 /**
  * 表单开关
