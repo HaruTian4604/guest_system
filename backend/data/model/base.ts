@@ -284,4 +284,55 @@ export class Base {
    */
   static validate(row: any) { }
 
+  // 在base.ts中添加以下方法
+
+  protected static async _checkDateOverlap(
+    table: string,
+    field: string,
+    id: number,
+    startDate: string,
+    endDate: string,
+    excludeId?: number
+  ): Promise<boolean> {
+    const conn = await get_connection();
+    try {
+      const excludeClause = excludeId ? 'AND id != ?' : '';
+      const params = excludeId ? [id, startDate, endDate, startDate, endDate, excludeId] :
+        [id, startDate, endDate, startDate, endDate];
+
+      const [rows] = await conn.query<RowDataPacket[]>(`
+      SELECT COUNT(*) as count
+      FROM ${table}
+      WHERE ${field} = ?
+      AND (
+        (start_date <= ? AND (end_date IS NULL OR end_date >= ?)) OR
+        (start_date <= ? AND (end_date IS NULL OR end_date >= ?))
+      )
+      ${excludeClause}
+    `, params);
+
+      return rows[0].count > 0;
+    } finally {
+      conn.end();
+    }
+  }
+
+  // 添加状态更新方法
+  protected static async _updateStatus(
+    table: string,
+    id: number,
+    statusField: string,
+    statusValue: string
+  ): Promise<void> {
+    const conn = await get_connection();
+    try {
+      await conn.query(
+        `UPDATE ${table} SET ${statusField} = ? WHERE id = ?`,
+        [statusValue, id]
+      );
+    } finally {
+      conn.end();
+    }
+  }
+
 }

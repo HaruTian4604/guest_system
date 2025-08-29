@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Refugee System - Placement Management</title>
+  <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="plugin/yo/yo.css">
+</head>
+
+<body>
+  <nav id="topbar" class="navbar navbar-light bg-light">
+    <a class="navbar-brand">Refugee System</a>
+  </nav>
+  <div class="row m-0">
+    <div class="sidebar col-2">
+      <a href="index.html">Dashboard</a>
+      <a href="guest.html">Guest</a>
+      <a href="accommodation.html">Accommodation</a>
+      <a href="host.html">Host</a>
+      <a href="placement.html" class="active">Placement</a>
+    </div>
+    <div class="content col">
+      <h1>Placement Management</h1>
+      <div class="toolbar mb-3">
+        <div class="btn-group">
+          <button id="btn_add" class="btn btn-secondary">Add New Placement</button>
+        </div>
+        <form id="form_search" class="d-inline-block search">
+          <div class="input-group">
+            <input id="input_search" type="search" class="form-control" placeholder="Search by guest or host name">
+            <div class="input-group-append">
+              <button class="btn btn-secondary" type="submit">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="mb-3">
+        <h2>Add/Update Placement</h2>
+        <form id="form_main" hidden>
+          <input name="id" type="hidden">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="guest_id">Guest *</label>
+                <select name="guest_id" id="guest_id" class="form-control" required>
+                  <option value="">Select guest...</option>
+                  <!-- Dynamically populated with unplaced guests -->
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="host_id">Host *</label>
+                <select name="host_id" id="host_id" class="form-control" required>
+                  <option value="">Select host...</option>
+                  <!-- Dynamically populated with hosts -->
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="accommodation_id">Accommodation *</label>
+                <select name="accommodation_id" id="accommodation_id" class="form-control" required>
+                  <option value="">Select accommodation...</option>
+                  <!-- Dynamically populated with available accommodations -->
+                </select>
+              </div>
+              <div class="form-group date-input-group">
+                <div class="form-group">
+                  <label for="start_date">Start Date (DD-MM-YYYY) *</label>
+                  <input name="start_date" id="start_date" class="form-control" type="text" placeholder="DD-MM-YYYY"
+                    pattern="\d{2}-\d{2}-\d{4}" required>
+                </div>
+                <div class="form-group">
+                  <label for="end_date">End Date (DD-MM-YYYY)</label>
+                  <input name="end_date" id="end_date" class="form-control" type="text" placeholder="DD-MM-YYYY"
+                    pattern="\d{2}-\d{2}-\d{4}">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="conflict-message" class="alert alert-warning d-none mt-2"></div>
+          <div class="form-group mt-3">
+            <button class="btn btn-primary" type="submit">Submit</button>
+            <button id="form_main_cancel" class="btn btn-secondary" type="button">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div>
+        <table id="table_main" class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Guest</th>
+              <th>Host</th>
+              <th>Accommodation</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="pager"></div>
+      </div>
+    </div>
+  </div>
+  <script src="plugin/yo/yo.js"></script>
+  <script src="plugin/pager/pager.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/userswitch.js"></script>
+  <script src="js/log.js"></script>
+  <!--  -->
+  <script src="js/detail.js"></script>
+  <script src="js/placement.js"></script>
+</body>
+
+</html>

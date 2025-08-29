@@ -18,53 +18,56 @@
   </nav>
   <div class="row m-0">
     <div class="sidebar col-2">
-      <a href="" class="active">Dashboard</a>
+      <a href="index.html" class="active">Dashboard</a>
       <a href="guest.html">Guest</a>
+      <a href="accommodation.html">Accommodation</a>
+      <a href="host.html">Host</a>
+      <a href="placement.html">Placement</a>
     </div>
-<!-- 修改后的 Dashboard 部分 -->
-<div class="content col">
-  <h1>Dashboard</h1>
-  <div class="row">
-    <!-- Panel 1: Guest Overview -->
-    <div class="col-md-4">
-      <div class="panel">
-        <div class="panel-heading">
-          <h3 class="panel-title">Guest Overview</h3>
-        </div>
-        <div class="panel-body">
-          <div class="stats-summary">
-            <div class="stat-item">
-              <span class="stat-label">Total Guests</span>
-              <span id="total-guests" class="stat-value">0</span>
+    <!-- 修改后的 Dashboard 部分 -->
+    <div class="content col">
+      <h1>Dashboard</h1>
+      <div class="row">
+        <!-- Panel 1: Guest Overview -->
+        <div class="col-md-4">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Guest Overview</h3>
             </div>
-            <div class="stat-item">
-              <span class="stat-label text-success">Placed</span>
-              <span id="placed-guests" class="stat-value">0</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label text-warning">Unplaced</span>
-              <span id="unplaced-guests" class="stat-value">0</span>
+            <div class="panel-body">
+              <div class="stats-summary">
+                <div class="stat-item">
+                  <span class="stat-label">Total Guests</span>
+                  <span id="total-guests" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label text-success">Placed</span>
+                  <span id="placed-guests" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label text-warning">Unplaced</span>
+                  <span id="unplaced-guests" class="stat-value">0</span>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="guestChart"></canvas>
+              </div>
             </div>
           </div>
-          <div class="chart-container">
-            <canvas id="guestChart"></canvas>
-          </div>
         </div>
+        <!-- 其他面板保持不变 -->
       </div>
     </div>
-    <!-- 其他面板保持不变 -->
   </div>
-</div>
-  </div>
-   <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-   <script src="plugin/yo/yo.js"></script>
-   <script src="plugin/pager/pager.js"></script>
-   <script src="js/main.js"></script>
-   <script src="js/userswitch.js"></script>
-   <script src="js/log.js"></script>
-   <!--  -->
-   <script src="node_modules/chart.js/dist/chart.umd.js"></script>
-   <script src="js/dashboard.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+  <script src="plugin/yo/yo.js"></script>
+  <script src="plugin/pager/pager.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/userswitch.js"></script>
+  <script src="js/log.js"></script>
+  <!--  -->
+  <script src="node_modules/chart.js/dist/chart.umd.js"></script>
+  <script src="js/dashboard.js"></script>
 </body>
 
 </html>
