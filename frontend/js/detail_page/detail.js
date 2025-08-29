@@ -129,11 +129,37 @@ window.Details = {
 
         // 修改boot方法以使用新的loadRelatedData
         async boot() {
-            const id = Details.getIdFromUrl(this.opt.idKey || 'id');
-            if (!id || isNaN(parseInt(id))) return Details.showErrorMessage('Invalid ID');
+            // const id = Details.getIdFromUrl(this.opt.idKey || 'id');
+            // if (!id || isNaN(parseInt(id))) return Details.showErrorMessage('Invalid ID');
 
-            const r = await api(this.opt.pickSeg, { id });
-            if (!r?.ok) return Details.showErrorMessage(r?.error || 'Load failed');
+            // const r = await api(this.opt.pickSeg, { id });
+            // if (!r?.ok) return Details.showErrorMessage(r?.error || 'Load failed');
+            console.log('DetailPage boot started');
+            const id = Details.getIdFromUrl(this.opt.idKey || 'id');
+            console.log('ID from URL:', id);
+
+            if (!id || isNaN(parseInt(id))) {
+                console.error('Invalid ID');
+                return Details.showErrorMessage('Invalid ID');
+            }
+
+            console.log('Fetching data from:', this.opt.pickSeg);
+            // const r = await api(this.opt.pickSeg, { id });
+            let r;
+            if (this.opt.pickSeg) {
+                r = await api(this.opt.pickSeg, { id });
+            } else if (this.opt.fetchers?.detail && typeof this.opt.fetchers.detail === 'function') {
+                r = await this.opt.fetchers.detail(id);
+            } else {
+                console.error('No detail endpoint provided (pickSeg or fetchers.detail).');
+                return Details.showErrorMessage('Load failed: no detail endpoint.');
+            }
+            console.log('API response:', r);
+
+            if (!r?.ok) {
+                console.error('API error:', r?.error);
+                return Details.showErrorMessage(r?.error || 'Load failed');
+            }
 
             ensureEl('loading')?.classList.add('d-none');
             ensureEl(`${this.opt.model}-details`)?.classList.remove('d-none');

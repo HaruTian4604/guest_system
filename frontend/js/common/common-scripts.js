@@ -35,12 +35,18 @@
   }
 
   (async () => {
-    for (const src of queue) {
-      await loadScript(src);
-    }
+    (async () => {
+      try {
+        for (const src of queue) await loadScript(src);
+        if (typeof window.onCommonScriptsLoaded === 'function') window.onCommonScriptsLoaded();
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+
     // 可选：加载完毕的回调（每页可定义 window.onCommonScriptsLoaded）
     if (typeof window.onCommonScriptsLoaded === 'function') {
-      try { window.onCommonScriptsLoaded(); } catch (e) {}
+      try { window.onCommonScriptsLoaded(); } catch (e) { }
     }
   })();
 })();
