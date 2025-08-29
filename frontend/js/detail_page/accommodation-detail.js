@@ -16,7 +16,7 @@
     $('accommodation-postcode').textContent = accommodation.postcode || '-';
 
     const hostLink = accommodation.host_id
-      ? `<a href="host-detail.html?id=${accommodation.host_id}">${accommodation.host_name || '-'}</a>`
+      ? `<a href="host-detail.html?id=${accommodation.host_id}">${accommodation.host_name || 'Unknown Host'}</a>`
       : '-';
     $('accommodation-host').innerHTML = hostLink;
 
