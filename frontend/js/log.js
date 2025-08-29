@@ -2,7 +2,7 @@
     const $ = (sel, ctx = document) => sel instanceof Element ? sel : ctx.querySelector(sel);
     const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
     // 只有当前页面是日志页面时才执行
-    if (!window.location.pathname.includes('log.html')) return;
+    // if (!window.location.pathname.includes('log.html')) return;
 
     const input_search = document.getElementById('input_search');
     const form_search = document.getElementById('form_search');
@@ -221,20 +221,20 @@
 })();
 
 // 侧边栏按钮添加函数
-function addLogButtonToSidebar() {
-    const sidebars = document.querySelectorAll('.sidebar');
+// function addLogButtonToSidebar() {
+//     const sidebars = document.querySelectorAll('.sidebar');
 
-    sidebars.forEach(sidebar => {
-        if (!sidebar.querySelector('#log_btn')) {
-            const logBtn = document.createElement('a');
-            logBtn.id = 'log_btn';
-            logBtn.innerHTML = 'Operation Log';
-            logBtn.href = 'log.html';
-            logBtn.className = 'btn btn-outline-primary btn-block btn-sm';
-            sidebar.appendChild(logBtn);
-        }
-    });
-}
+//     sidebars.forEach(sidebar => {
+//         if (!sidebar.querySelector('#log_btn')) {
+//             const logBtn = document.createElement('a');
+//             logBtn.id = 'log_btn';
+//             logBtn.innerHTML = 'Operation Log';
+//             logBtn.href = 'log.html';
+//             logBtn.className = 'btn btn-outline-primary btn-block btn-sm';
+//             sidebar.appendChild(logBtn);
+//         }
+//     });
+// }
 
-// 在DOM加载完成后调用
-document.addEventListener('DOMContentLoaded', addLogButtonToSidebar);
+// // 在DOM加载完成后调用
+// document.addEventListener('DOMContentLoaded', addLogButtonToSidebar);

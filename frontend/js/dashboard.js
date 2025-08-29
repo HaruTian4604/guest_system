@@ -155,3 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initCharts();
   window.addEventListener('resize', handleResize);
 });
+
+// 在文件最后添加
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCharts);
+} else {
+  initCharts();
+}

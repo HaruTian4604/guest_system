@@ -1,5 +1,14 @@
 // frontend/js/userswitch.js
 (function () {
+  // function toastError(msg, err) {
+  //   if (typeof window.yo_error === 'function') window.yo_error(msg);
+  //   else console.error(msg, err || '');
+  // }
+  // function toastSuccess(msg) {
+  //   if (typeof window.yo_success === 'function') window.yo_success(msg);
+  //   else console.log(msg);
+  // }
+
   // 当前用户状态，初始化时只有 token
   const TWO_DEMO_USERS = [
     { name: 'iamadmin', token: '1415926' },
@@ -10,9 +19,7 @@
 
   // 创建用户切换界面
   function createDemoUserSwitch(users) {
-    const container = document.createElement('div');
-    container.className = 'ms-auto';
-    container.id = 'user-switch-container';
+    const container = document.querySelector('#user-switch-slot') || document.querySelector('#topbar .navbar');
 
     const group = document.createElement('div');
     group.className = 'btn-group';
@@ -106,9 +113,14 @@
       }
 
       // 4. 创建并添加用户切换界面
-      const navbar = document.getElementById('topbar');
-      if (navbar) {
-        navbar.appendChild(createDemoUserSwitch(TWO_DEMO_USERS));
+      // const navbar = document.getElementById('topbar');
+      // if (navbar) {
+      //   navbar.appendChild(createDemoUserSwitch(TWO_DEMO_USERS));
+      // }
+      // 4. 先创建并挂载按钮组（即使接口失败也能看到 UI）
+      const slot = document.querySelector('#user-switch-slot') || document.querySelector('#topbar .navbar');
+      if (slot && !slot.querySelector('.btn-group[role="group"]')) {
+        createDemoUserSwitch(TWO_DEMO_USERS); // 函数内部已 append 到 slot
       }
     } catch (error) {
       yo_error('Cannot initialize user switch:', error);
@@ -130,6 +142,11 @@
     }
   };
 
-  // 初始化
-  document.addEventListener('DOMContentLoaded', initUserSwitch);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUserSwitch);
+  } else {
+    // 如果脚本是后加载的（动态插入），DOMContentLoaded 可能已经触发了，这里直接初始化
+    initUserSwitch();
+  }
+
 })();
