@@ -2,19 +2,20 @@ import { get_connection } from '../../boot/database';
 import { Invalid_argument } from '../../error/invalid_argument';
 import type { Connection, ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { getCurrentUser } from '../../net/request';
+
 /**
  * Base class
  */
 
 type OpType =
   'CREATE' | 'UPDATE' | 'DELETE' | 'STATUS_CHANGE' | 'ARCHIVE';
-
 export class Base {
   // static type: string;
   static tableName: string;
   static searchable: string[];
   static fillable: string[];
   static columns: string | string[] = '*';
+  static viewName?: string; // 新增：若设置则读取走视图
 
   id: number; // Unique identifier
   // base.ts
@@ -23,6 +24,11 @@ export class Base {
     const extra = ['id', 'created_at', 'updated_at'];
     const s = new Set([...(this.fillable || []), ...extra]);
     return Array.from(s);
+  }
+
+  protected static _readFrom(): string {
+    // 读操作统一走 viewName（若声明），否则走 tableName
+    return (this as any).viewName || this.tableName;
   }
 
   protected static _ensureOrderBy(order_by: string): string {
@@ -125,32 +131,33 @@ export class Base {
     const params = fields.map(() => `%${keyword}%`);
     return { where: ` WHERE ${cond}`, params };
   }
-  /**
-   * Get total count of records
-   */
-  // static async count(): Promise<number> {
+
+  // static async count(keyword?: string): Promise<number> {
   //   const conn = await get_connection();
   //   try {
-  //     const [rows] = await conn.query<RowDataPacket[]>(
-  //       `SELECT COUNT(*) as count FROM ${this.tableName}`
-  //     );
+  //     let sql = `SELECT COUNT(*) as count FROM ${this.tableName}`;
+  //     const { where, params } = this._buildKeywordWhere(keyword);
+  //     sql += where;
+  //     const [rows] = await conn.query<RowDataPacket[]>(sql, params);
   //     return rows[0].count as number;
   //   } finally {
   //     conn.end();
   //   }
   // }
-  static async count(keyword?: string): Promise<number> {
+    static async count(keyword?: string): Promise<number> {
     const conn = await get_connection();
     try {
-      let sql = `SELECT COUNT(*) as count FROM ${this.tableName}`;
       const { where, params } = this._buildKeywordWhere(keyword);
-      sql += where;
-      const [rows] = await conn.query<RowDataPacket[]>(sql, params);
+      const [rows] = await conn.query<RowDataPacket[]>(
+        `SELECT COUNT(*) as count FROM ${this._readFrom()}${where}`,
+        params
+      );
       return rows[0].count as number;
     } finally {
       conn.end();
     }
   }
+
 
   /**
    * Create a new record
@@ -240,7 +247,9 @@ export class Base {
 
     const conn = await get_connection();
     try {
-      let sql = `SELECT ${this._selectColumns()} FROM ${this.tableName}`;
+      // let sql = `SELECT ${this._selectColumns()} FROM ${this.tableName}`;
+      let sql = `SELECT ${this._selectColumns()} FROM ${this._readFrom()}`;
+
       const { where, params } = this._buildKeywordWhere(keyword);
       sql += where;
       sql += ` ORDER BY ${this._ensureOrderBy(order_by)} ${desc ? 'DESC' : 'ASC'}`;
@@ -260,7 +269,8 @@ export class Base {
   static async pick(id: number, conn?: Connection): Promise<any> {
     if (conn) {
       const [rows] = await conn.query<RowDataPacket[]>(
-        `SELECT * FROM ${this.tableName} WHERE id = ?`,
+        // `SELECT * FROM ${this.tableName} WHERE id = ?`,
+        `SELECT * FROM ${this._readFrom()} WHERE id = ?`,
         [id]
       );
       return rows[0] || null;
@@ -269,7 +279,8 @@ export class Base {
     const c = await get_connection();
     try {
       const [rows] = await c.query<RowDataPacket[]>(
-        `SELECT * FROM ${this.tableName} WHERE id = ?`,
+        // `SELECT * FROM ${this.tableName} WHERE id = ?`,
+        `SELECT * FROM ${this._readFrom()} WHERE id = ?`,
         [id]
       );
       return rows[0] || null;

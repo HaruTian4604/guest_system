@@ -47,43 +47,55 @@
     }),
   };
 
-const page = new Details.DetailPage({
-  model: 'accommodation',
-  pickSeg: 'accommodation/pick',  // ★ 后端实际存在的详情端点
-  afterLoad: renderAccommodationInfo,
+  const page = new Details.DetailPage({
+    model: 'accommodation',
+    pickSeg: 'accommodation/pick',  // ★ 后端实际存在的详情端点
+    afterLoad: renderAccommodationInfo,
 
-  sections: {
-    notes: { saveSeg: 'accommodation/update', field: 'note' },
-    relatedData: [
-      {
-        listSeg: 'placement/list-by-accommodation',
-        params: (accommodationId) => ({ accommodation_id: accommodationId }),
-        tbodyId: 'placements-body',
-        tableElementId: 'placements-table',
-        noDataElementId: 'no-placements',
-        columns: [
-          { render: (p) => `<td><a href="guest-detail.html?id=${p.guest_id}">${p.guest_name || '-'}</a></td>` },
-          { render: (p) => `<td><a href="host-detail.html?id=${p.host_id}">${p.host_name || '-'}</a></td>` },
-          { render: (p) => `<td>${Details.formatDDMMYYYY(p.start_date)}</td>` },
-          { render: (p) => `<td>${p.end_date ? Details.formatDDMMYYYY(p.end_date) : 'Ongoing'}</td>` },
-          {
-            render: (p) => {
-              const today = new Date();
-              const [d,m,y] = p.end_date ? p.end_date.split('-').map(Number) : [];
-              const endDate = p.end_date ? new Date(y, m - 1, d) : null;
-              const ended = endDate && endDate < today;
-              const klass = ended ? 'badge-secondary' : 'badge-success';
-              const label = ended ? 'Completed' : 'Active';
-              return `<td><span class="badge ${klass}">${label}</span></td>`;
-            }
-          },
-        ]
-      }
-    ]
-  },
+    sections: {
+      notes: { saveSeg: 'accommodation/update', field: 'note' },
+      relatedData: [
+        {
+          listSeg: 'placement/list-by-accommodation',
+          params: (accommodationId) => ({ accommodation_id: accommodationId }),
+          tbodyId: 'placements-body',
+          tableElementId: 'placements-table',
+          noDataElementId: 'no-placements',
+          columns: [
+            { render: (p) => `<td><a href="guest-detail.html?id=${p.guest_id}">${p.guest_name || '-'}</a></td>` },
+            { render: (p) => `<td><a href="host-detail.html?id=${p.host_id}">${p.host_name || '-'}</a></td>` },
+            // { render: (p) => `<td>${Details.formatDDMMYYYY(p.start_date)}</td>` },
+            // { render: (p) => `<td>${p.end_date ? Details.formatDDMMYYYY(p.end_date) : 'Ongoing'}</td>` },
+            // {
+            //   render: (p) => {
+            //     const today = new Date();
+            //     const [d,m,y] = p.end_date ? p.end_date.split('-').map(Number) : [];
+            //     const endDate = p.end_date ? new Date(y, m - 1, d) : null;
+            //     const ended = endDate && endDate < today;
+            //     const klass = ended ? 'badge-secondary' : 'badge-success';
+            //     const label = ended ? 'Completed' : 'Active';
+            //     return `<td><span class="badge ${klass}">${label}</span></td>`;
+            //   }
+            // },
+            { render: (p) => `<td>${Details.formatYMD(p.start_date)}</td>` },
+            { render: (p) => `<td>${p.end_date ? Details.formatYMD(p.end_date) : '-'}</td>` },
+            {
+              render: (p) => {
+                const label = (p.status || '').toLowerCase(); // 'active' | 'completed' | 'upcoming'
+                const klass =
+                  label === 'active' ? 'badge-success' :
+                    label === 'completed' ? 'badge-secondary' :
+                      'badge-info'; // upcoming
+                return `<td><span class="badge ${klass}">${label || '-'}</span></td>`;
+              }
+            },
+          ]
+        }
+      ]
+    },
 
-  syncHeights: () => Details.syncCardHeights('accommodation-info-card', 'notes-card'),
-});
+    syncHeights: () => Details.syncCardHeights('accommodation-info-card', 'notes-card'),
+  });
 
 
   ready(() => page.boot());

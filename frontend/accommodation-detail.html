@@ -13,17 +13,9 @@
 <link rel="stylesheet" href="plugin/yo/yo.css">
 
 <body>
-    <nav id="topbar" class="navbar navbar-light bg-light">
-        <a class="navbar-brand">Refugee System</a>
-    </nav>
+    <div id="topbar"></div>
     <div class="row m-0">
-        <div class="sidebar col-2">
-            <a href="index.html">Dashboard</a>
-            <a href="guest.html">Guest</a>
-            <a href="accommodation.html" class="active">Accommodation</a>
-            <a href="host.html">Host</a>
-            <a href="placement.html">Placement</a>
-        </div>
+        <div id="sidebar" class="sidebar col-2"></div>
         <div class="content col">
             <h1>Accommodation Details</h1>
             <div class="mt-4">
@@ -123,11 +115,17 @@
             </div>
         </div>
     </div>
-    <script src="plugin/yo/yo.js"></script>
-    <script src="plugin/pager/pager.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/userswitch.js"></script>
-    <script src="js/log.js"></script>
-    <script src="js/detail.js"></script>
+    <script>
+        window.pageConfig = {
+            active: 'accommodation',
+            title: 'Accommodation Detail',
+            brand: 'Refugee System'
+        };
+    </script>
+    <script>
+        window.pageScripts = ['js/detail_page/detail.js','js/detail_page/accommodation-detail.js'];
+    </script>
+    <script src="js/common/common-scripts.js"></script>
 </body>
+
 </html>

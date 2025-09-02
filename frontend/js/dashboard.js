@@ -107,7 +107,7 @@ async function initCharts() {
   const charts = [
     {
       canvasId: 'guestChart',
-      apiEndpoint: 'guest-stats',
+      apiEndpoint: 'guest-dashboard',
       chartName: 'Guest Status',
       chartType: 'doughnut',
       labels: ['Placed', 'Unplaced'],

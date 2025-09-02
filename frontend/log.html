@@ -19,23 +19,15 @@
 <link rel="stylesheet" href="plugin/yo/yo.css">
 
 <body>
-  <nav id="topbar" class="navbar navbar-light bg-light">
-    <a class="navbar-brand">Refugee System</a>
-  </nav>
+  <div id="topbar"></div>
   <div class="row m-0">
-    <div class="sidebar col-2">
-      <a href="index.html">Dashboard</a>
-      <a href="guest.html">Guest</a>
-      <a href="accommodation.html">Accommodation</a>
-      <a href="host.html">Host</a>
-      <a href="placement.html">Placement</a>
-    </div>
+    <div id="sidebar" class="sidebar col-2"></div>
     <div class="content col">
       <h1>Operation Log</h1>
       <div class="toolbar mb-3">
         <form id="form_search" class="d-inline-block search">
           <div class="input-group">
-            <input id="input_search" type="search" class="form-control" placeholder="Search by 还没想好">
+            <input id="input_search" type="search" class="form-control" placeholder="Search by ...">
             <div class="input-group-append">
               <button class="btn btn-secondary" type="submit">Search</button>
             </div>
@@ -60,13 +52,17 @@
       </div>
     </div>
   </div>
-  <script src="plugin/yo/yo.js"></script>
-  <script src="plugin/pager/pager.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/userswitch.js"></script>
-  <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="js/log.js"></script>
-  <!--  -->
+  <script>
+    window.pageConfig = {
+      active: '',
+      title: 'Operation Log',
+      brand: 'Refugee System'
+    };
+  </script>
+  <script>
+    window.pageScripts = ['node_modules/bootstrap/dist/js/bootstrap.bundle.min.js','js/log.js'];
+  </script>
+  <script src="js/common/common-scripts.js"></script>
 </body>
 
 </html>

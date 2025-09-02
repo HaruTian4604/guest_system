@@ -74,7 +74,7 @@ function form2value(form) {
 }
 
 function value2form(row, form = form_main) {
-  const requiredInput = ['id','full_name', 'date_of_birth', 'status'];
+  const requiredInput = ['id','full_name', 'date_of_birth'];
 
   for (let key of requiredInput) {
     if (row.hasOwnProperty(key)) {

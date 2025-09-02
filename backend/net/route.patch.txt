@@ -1,7 +1,0 @@
-// In route.ts, register the accommodation routes (minimal diff):
-// 1) Import: 
-//   import accommodationRouter from './accommodation';
-// 2) Mount:
-//   app.use('/api/accommodation', accommodationRouter);
-// 3) (Optional) Provide host options endpoint shortcut:
-//   app.get('/api/host/options', async (req, res) => { forward or reuse from accommodationRouter });

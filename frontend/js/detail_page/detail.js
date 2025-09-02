@@ -6,31 +6,72 @@ window.Details = {
         return urlParams.get(key);
     },
 
-    formatDDMMYYYY(dateStr) {
-        if (!dateStr) return '-';
-        try {
-            const [day, month, year] = dateStr.split('-');
-            const d = new Date(Number(year), Number(month) - 1, Number(day));
-            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-        } catch {
-            return dateStr;
-        }
-    },
+    // formatDDMMYYYY(dateStr) {
+    //     if (!dateStr) return '-';
+    //     try {
+    //         const [day, month, year] = dateStr.split('-');
+    //         const d = new Date(Number(year), Number(month) - 1, Number(day));
+    //         return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    //     } catch {
+    //         return dateStr;
+    //     }
+    // },
 
-    calculateAge(dob) {
-        if (!dob) return null;
-        try {
-            const [day, month, year] = dob.split('-').map(Number);
-            const birth = new Date(year, month - 1, day);
-            const today = new Date();
-            let age = today.getFullYear() - birth.getFullYear();
-            const m = today.getMonth() - birth.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-            return age;
-        } catch {
-            return null;
-        }
-    },
+formatYMD(dateStr) {
+  if (!dateStr) return '-';
+  // 兼容三种输入：YYYY-MM-DD | YYYY-MM-DDTHH:mm:ss.sssZ | DD-MM-YYYY
+  if (typeof dateStr === 'string') {
+    // ISO: 截前10位即可
+    if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) return dateStr.slice(0, 10);
+    // 已是 YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // 兼容旧的 DD-MM-YYYY
+    const m2 = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
+  }
+  // 兜底：如果给的是 Date 对象
+  if (dateStr instanceof Date) {
+    const y = dateStr.getFullYear();
+    const m = String(dateStr.getMonth() + 1).padStart(2, '0');
+    const d = String(dateStr.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  return String(dateStr);
+},
+
+calculateAge(dob) {
+  if (!dob) return null;
+  try {
+    let y, m, d;
+    if (typeof dob === 'string') {
+      // ISO: 取前10位
+      if (/^\d{4}-\d{2}-\d{2}T/.test(dob)) [y, m, d] = dob.slice(0, 10).split('-').map(Number);
+      // YYYY-MM-DD
+      else if (/^\d{4}-\d{2}-\d{2}$/.test(dob)) [y, m, d] = dob.split('-').map(Number);
+      // DD-MM-YYYY
+      else if (/^\d{2}-\d{2}-\d{4}$/.test(dob)) {
+        const parts = dob.split('-').map(Number);
+        d = parts[0]; m = parts[1]; y = parts[2];
+      } else {
+        return null;
+      }
+    } else if (dob instanceof Date) {
+      y = dob.getFullYear(); m = dob.getMonth() + 1; d = dob.getDate();
+    } else {
+      return null;
+    }
+
+    const birth = new Date(y, m - 1, d);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const mm = today.getMonth() - birth.getMonth();
+    if (mm < 0 || (mm === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  } catch {
+    return null;
+  }
+},
+
 
     showErrorMessage(message) {
         document.getElementById('loading')?.classList.add('d-none');

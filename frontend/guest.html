@@ -13,17 +13,10 @@
 <link rel="stylesheet" href="plugin/yo/yo.css">
 
 <body>
-  <nav id="topbar" class="navbar navbar-light bg-light">
-    <a class="navbar-brand">Refugee System</a>
-  </nav>
+  <div id="topbar"></div>
   <div class="row m-0">
-    <div class="sidebar col-2">
-            <a href="index.html">Dashboard</a>
-            <a href="guest.html"  class="active">Guest</a>
-            <a href="accommodation.html">Accommodation</a>
-            <a href="host.html">Host</a>
-            <a href="placement.html">Placement</a>
-    </div>
+    <div id="sidebar" class="sidebar col-2"></div>
+
     <div class="content col">
       <h1>Guest Management</h1>
       <div class="toolbar mb-3">
@@ -33,7 +26,7 @@
         </div>
         <form id="form_search" class="d-inline-block search">
           <div class="input-group">
-            <input id="input_search" type="search" class="form-control" placeholder="Search by name or status">
+            <input id="input_search" type="search" class="form-control" placeholder="Search by name">
             <div class="input-group-append">
               <button class="btn btn-secondary" type="submit">Search</button>
             </div>
@@ -49,18 +42,20 @@
             <input name="full_name" id="full_name" class="form-control" type="text" required>
           </div>
           <div class="form-group">
-            <label for="date_of_birth">Date of Birth (DD-MM-YYYY)</label>
-            <input name="date_of_birth" id="date_of_birth" class="form-control" type="text" placeholder="DD-MM-YYYY"
-              pattern="\d{2}-\d{2}-\d{4}" required>
+            <label for="date_of_birth">Date of Birth</label>
+            <!-- <input name="date_of_birth" id="date_of_birth" class="form-control" type="text" placeholder="DD-MM-YYYY"
+              pattern="\d{2}-\d{2}-\d{4}" required> -->
+              <input type="date" name="date_of_birth" id="date_of_birth" class="form-control"placeholder="YYYY-MM-DD"
+              pattern="\d{4}/\d{2}/\d{2}" required />
           </div>
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label for="status">Status</label>
             <select name="status" id="status" class="form-control" required>
               <option value="">Select status...</option>
               <option value="placed">Placed</option>
               <option value="unplaced">Unplaced</option>
             </select>
-          </div>
+          </div> -->
           <div class="form-group">
             <button class="btn btn-primary" type="submit">Submit</button>
             <button id="form_main_cancel" class="btn btn-secondary" type="button">Cancel</button>
@@ -86,14 +81,17 @@
       </div>
     </div>
   </div>
-  <script src="plugin/yo/yo.js"></script>
-  <script src="plugin/pager/pager.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/userswitch.js"></script>
-  <script src="js/log.js"></script>
-  <!--  -->
-  <script src="js/detail.js"></script>
-  <script src="js/guest.js"></script>
+  <script>
+    window.pageConfig = {
+      active: 'guest',
+      title: 'Guest Management',
+      brand: 'Refugee System'
+    };
+  </script>
+  <script>
+    window.pageScripts = ['js/detail_page/detail.js', 'js/guest.js'];
+  </script>
+  <script src="js/common/common-scripts.js"></script>
 </body>
 
 </html>

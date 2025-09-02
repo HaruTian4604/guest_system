@@ -13,17 +13,9 @@
 <link rel="stylesheet" href="plugin/yo/yo.css">
 
 <body>
-  <nav id="topbar" class="navbar navbar-light bg-light">
-    <a class="navbar-brand">Refugee System</a>
-  </nav>
+  <div id="topbar"></div>
   <div class="row m-0">
-    <div class="sidebar col-2">
-      <a href="index.html" class="active">Dashboard</a>
-      <a href="guest.html">Guest</a>
-      <a href="accommodation.html">Accommodation</a>
-      <a href="host.html">Host</a>
-      <a href="placement.html">Placement</a>
-    </div>
+    <div id="sidebar" class="sidebar col-2"></div>
     <!-- 修改后的 Dashboard 部分 -->
     <div class="content col">
       <h1>Dashboard</h1>
@@ -59,15 +51,25 @@
       </div>
     </div>
   </div>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-  <script src="plugin/yo/yo.js"></script>
-  <script src="plugin/pager/pager.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/userswitch.js"></script>
-  <script src="js/log.js"></script>
-  <!--  -->
-  <script src="node_modules/chart.js/dist/chart.umd.js"></script>
-  <script src="js/dashboard.js"></script>
+<!-- 先告诉 layout 当前页 -->
+<script>
+  window.pageConfig = {
+    active: 'dashboard',
+    title: 'Dashboard',
+    brand: 'Refugee System'
+  };
+
+  // 让页面专用脚本跟在公共脚本之后按顺序加载
+  window.pageScripts = [
+    'node_modules/chart.js/dist/chart.umd.js',
+    'js/dashboard.js'
+  ];
+</script>
+
+<!-- 统一加载：yo.js -> pager.js -> layout.js -> main.js -> userswitch.js -> log.js -> (Chart) -> (dashboard) -->
+<script src="js/common/common-scripts.js"></script>
+
+
 </body>
 
 </html>

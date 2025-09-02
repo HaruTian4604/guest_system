@@ -26,7 +26,7 @@
       notes: { saveSeg: 'host/update', field: 'note' },
       relatedData: [
         {
-          listSeg: 'host/list-accommodations',
+          listSeg: 'host/list-by-accommodations',
           params: (hostId) => ({ host_id: hostId }),
           tbodyId: 'accommodations-body',
           tableElementId: 'accommodations-table',

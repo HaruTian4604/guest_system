@@ -144,7 +144,6 @@ function hide_form(form) {
 
 function reset_form(form) {
   form.reset()
-  if (status_select) status_select.value = ''
 }
 
 function listen() {
@@ -163,14 +162,13 @@ function listen() {
     let action = row.id ? 'update' : 'create'
 
     // Validate required fields
-    if (!row.full_name || !row.date_of_birth || !row.status) {
+    if (!row.full_name || !row.date_of_birth) {
       yo_error('Please fill all required fields')
       return
     }
 
-    // Validate date format (DD-MM-YYYY)
     if (!validateDob(row.date_of_birth)) {
-      yo_error('Please enter a valid date in DD-MM-YYYY format')
+      yo_error('Please enter a valid date in YYYY-MM-DD format')
       return
     }
 
@@ -198,16 +196,11 @@ function listen() {
 }
 
 function validateDob(dob) {
-  // Validate DD-MM-YYYY format
-  const regex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/
-  return regex.test(dob)
+  // YYYY-MM-DD（MySQL DATE）
+  const m = dob.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return false;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  const dt = new Date(y, mo - 1, d);
+  // 简单合法性检查（防 2025-02-31 这种）
+  return dt.getFullYear() === y && (dt.getMonth() + 1) === mo && dt.getDate() === d;
 }
-
-// function highlight_current_page(pager) {
-//   document.querySelectorAll('.page-item').forEach(item => {
-//     item.classList.remove('active')
-//     if (item.dataset.page === String(pager.current)) {
-//       item.classList.add('active')
-//     }
-//   })
-// }

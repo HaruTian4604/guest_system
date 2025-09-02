@@ -8,7 +8,7 @@ const table_main = document.getElementById('table_main')
 const form_main_cancel = document.getElementById('form_main_cancel')
 const e_pager = document.getElementById('pager')
 const hostSelect = document.getElementById('host_id')
-const statusSelect = document.getElementById('status')
+// const statusSelect = document.getElementById('status')
 
 const limit = 10
 let rows, total, pager, list_args = { limit }
@@ -155,7 +155,7 @@ function hide_form(form) {
 
 function reset_form(form) {
   form.reset()
-  if (statusSelect) statusSelect.value = ''
+  // if (statusSelect) statusSelect.value = ''
 }
 
 function listen() {
@@ -174,7 +174,8 @@ function listen() {
     let action = row.id ? 'update' : 'create'
 
     // Validate required fields
-    if (!row.address || !row.postcode || !row.host_id || !row.status) {
+    // if (!row.address || !row.postcode || !row.host_id || !row.status) {
+    if (!row.address || !row.postcode || !row.host_id) {
       yo_error('Please fill all required fields')
       return
     }

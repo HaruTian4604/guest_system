@@ -1,73 +1,42 @@
+// backend/data/model/accommodation.ts
+import type { RowDataPacket } from 'mysql2/promise';
 import { Base } from './base';
-import { Invalid_argument } from '../../error/invalid_argument';
-import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { get_connection } from '../../boot/database';
+import { Invalid_argument } from '../../error/invalid_argument';
 
 export class Accommodation extends Base {
   static tableName = 'accommodations';
-  static searchable: string[] = ['address', 'postcode', 'status'];
-  static fillable: string[] = ['address', 'postcode', 'host_id', 'status'];
-  static statuses: string[] = ['available', 'unavailable'];
+  static viewName  = 'view_accommodations';
+
+  // 关键词搜索字段
+  static searchable = ['address', 'postcode','host'];
+
+  // 可写字段（注意：不包含 status）
+  // 若你的表里确实有 note 字段，可把 'note' 加进来
+  static fillable   = ['address', 'postcode', 'host_id', 'archived'/*, 'note'*/];
+
+  // 读取字段（前端表格/详情需要 host_name 与 status）
+  static columns: string | string[] =
+    'id, address, postcode, host_id, archived, status, host_name';
 
   static validate(row: any) {
-    if (!row.address) {
-      throw new Invalid_argument('Address is required');
+    if ('address' in row) {
+      const v = String(row.address || '').trim();
+      if (!v) throw new Invalid_argument('address is required');
     }
-
-    if (!row.postcode) {
-      throw new Invalid_argument('Postcode is required');
+    if ('postcode' in row) {
+      const v = String(row.postcode || '').trim();
+      if (!v) throw new Invalid_argument('postcode is required');
     }
-
-    if (!row.host_id) {
-      throw new Invalid_argument('Host ID is required');
-    }
-
-    if (row.status && !this.statuses.includes(row.status)) {
-      throw new Invalid_argument(`Status must be one of: ${this.statuses.join(', ')}`);
-    }
-
-    // UK postcode validation (basic)
-    if (row.postcode && !/^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i.test(row.postcode)) {
-      throw new Invalid_argument('Please enter a valid UK postcode');
+    if ('host_id' in row) {
+      const n = Number(row.host_id);
+      if (!Number.isInteger(n) || n <= 0) throw new Invalid_argument('host_id is required');
     }
   }
 
-  static async getStats(): Promise<{ total: number, available_count: number, unavailable_count: number }> {
-    const conn = await get_connection();
-    try {
-      const [rows] = await conn.query<RowDataPacket[]>(`
-        SELECT
-          COUNT(*) AS total,
-          SUM(status = 'available') AS available_count,
-          SUM(status = 'unavailable') AS unavailable_count
-        FROM ${this.tableName}
-        WHERE archived = 0 OR archived IS NULL
-      `);
-      return {
-        total: rows[0].total,
-        available_count: rows[0].available_count || 0,
-        unavailable_count: rows[0].unavailable_count || 0
-      };
-    } finally {
-      conn.end();
-    }
-  }
+  // 详情：沿用 Base.pick() 即可（已读视图）
+  // 列表：沿用 Base.list() 即可（已读视图）
 
-  // 获取特定host的所有accommodation
-  static async listByHost(hostId: number): Promise<any[]> {
-    const conn = await get_connection();
-    try {
-      const [rows] = await conn.query<RowDataPacket[]>(`
-        SELECT a.*, h.full_name as host_name
-        FROM ${this.tableName} a
-        LEFT JOIN hosts h ON a.host_id = h.id
-        WHERE a.host_id = ?
-        ORDER BY a.address
-      `, [hostId]);
-
-      return rows;
-    } finally {
-      conn.end();
-    }
-  }
+  // 若详情页“备注”功能使用 accommodation.update({note})
+  // 且你表里有 note 字段，则无需额外处理；否则请在 DB 增加 note 列
 }

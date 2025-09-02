@@ -6,7 +6,7 @@
   <meta name="viewport"
     content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Refugee System - Accommodation Management</title>
+  <title>Refugee System</title>
 </head>
 <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="css/main.css">
@@ -16,15 +16,16 @@
   <div id="topbar"></div>
   <div class="row m-0">
     <div id="sidebar" class="sidebar col-2"></div>
+
     <div class="content col">
-      <h1>Accommodation Management</h1>
+      <h1>Host Management</h1>
       <div class="toolbar mb-3">
         <div class="btn-group">
           <button id="btn_add" class="btn btn-secondary">Add New</button>
         </div>
         <form id="form_search" class="d-inline-block search">
           <div class="input-group">
-            <input id="input_search" type="search" class="form-control" placeholder="Search by host, address or postcode">
+            <input id="input_search" type="search" class="form-control" placeholder="Search by name">
             <div class="input-group-append">
               <button class="btn btn-secondary" type="submit">Search</button>
             </div>
@@ -32,32 +33,13 @@
         </form>
       </div>
       <div class="mb-3">
-        <h2>Add/Update Accommodation</h2>
+        <h2>Add/Update Host</h2>
         <form id="form_main" hidden>
           <input name="id" type="hidden">
           <div class="form-group">
-            <label for="address">Address *</label>
-            <input name="address" id="address" class="form-control" type="text" required>
+            <label for="full_name">Full Name</label>
+            <input name="full_name" id="full_name" class="form-control" type="text" required>
           </div>
-          <div class="form-group">
-            <label for="postcode">Postcode *</label>
-            <input name="postcode" id="postcode" class="form-control" type="text" required>
-          </div>
-          <div class="form-group">
-            <label for="host_id">Host *</label>
-            <select name="host_id" id="host_id" class="form-control" required>
-              <option value="">Select host...</option>
-              <!-- Hosts will be populated dynamically -->
-            </select>
-          </div>
-          <!-- <div class="form-group">
-            <label for="status">Status *</label>
-            <select name="status" id="status" class="form-control" required>
-              <option value="">Select status...</option>
-              <option value="available">Available</option>
-              <option value="unavailable">Unavailable</option>
-            </select>
-          </div> -->
           <div class="form-group">
             <button class="btn btn-primary" type="submit">Submit</button>
             <button id="form_main_cancel" class="btn btn-secondary" type="button">Cancel</button>
@@ -70,10 +52,7 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Address</th>
-              <th>Postcode</th>
-              <th>Host</th>
-              <th>Status</th>
+              <th>Full Name</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -85,13 +64,13 @@
   </div>
   <script>
     window.pageConfig = {
-      active: 'accommodation',
-      title: 'Accommodation Management',
+      active: 'host',
+      title: 'Host Management',
       brand: 'Refugee System'
     };
   </script>
   <script>
-    window.pageScripts = ['js/accommodation.js'];
+    window.pageScripts = ['js/detail_page/detail.js', 'js/host.js'];
   </script>
   <script src="js/common/common-scripts.js"></script>
 </body>
