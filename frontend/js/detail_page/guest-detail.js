@@ -157,7 +157,6 @@
             { render: (p) => `<td><a href="host-detail.html?id=${p.host_id}">${p.host_name || '-'}</a></td>` },
             { render: (p) => `<td><a href="accommodation-detail.html?id=${p.accommodation_id}">${(p.accommodation_address || '-') + ' ' + (p.accommodation_postcode || '')}</a></td>` },
 
-            // 日期统一用 YYYY-MM-DD（兼容 ISO），函数在 detail.js 里已实现
             { render: (p) => `<td>${Details.formatYMD(p.start_date)}</td>` },
             { render: (p) => `<td>${p.end_date ? Details.formatYMD(p.end_date) : '-'}</td>` },
 

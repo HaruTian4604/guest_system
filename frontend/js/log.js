@@ -131,84 +131,37 @@
 
         document.body.appendChild(modal);
 
-        // 记录关闭后要恢复的“之前聚焦的元素”
         const previouslyFocused =
             document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
         const bsModal = new bootstrap.Modal(modal, {
             backdrop: true,
-            focus: true,   // 保持默认的可访问性行为
+            focus: true,
             keyboard: true
         });
 
-        // 打开后，把焦点给关闭按钮（也可以省略）
         modal.addEventListener('shown.bs.modal', () => {
             const closeBtn = modal.querySelector('.btn-close');
             if (closeBtn instanceof HTMLElement) closeBtn.focus();
         });
 
-        // 🔑 关键：开始隐藏时，先把焦点移出模态框，避免“aria-hidden 的祖先仍包含焦点”的告警
         modal.addEventListener('hide.bs.modal', () => {
             const ae = document.activeElement;
             if (ae instanceof HTMLElement && modal.contains(ae)) {
-                ae.blur();                 // 先移除子孙元素上的焦点
-                // 如需明确把焦点放到页面安全位置，可以选一个已存在的可聚焦元素：
-                // previouslyFocused?.focus();
-                // 或者放到导航/主容器上（若它们有 tabindex="-1"）
+                ae.blur();
             }
         });
 
-        // 完全隐藏后：销毁实例并移除节点；最后把焦点还给原先的元素（如果有）
         modal.addEventListener('hidden.bs.modal', () => {
             bsModal.dispose();
             document.body.removeChild(modal);
             if (previouslyFocused) {
-                // 恢复到触发前的焦点位置，提升可访问性体验
                 try { previouslyFocused.focus(); } catch { }
             }
         });
 
         bsModal.show();
     }
-
-
-    // function show_log_details(log) {
-    //     const modal = document.createElement('div');
-    //     modal.className = 'modal fade';
-    //     modal.setAttribute('tabindex', '-1');
-    //     modal.setAttribute('role', 'dialog');
-    //     modal.setAttribute('aria-modal', 'true');
-
-    //     modal.innerHTML = `
-    //         <div class="modal-dialog modal-lg">
-    //         <div class="modal-content">
-    //             <div class="modal-header">
-    //             <h5 class="modal-title">Log Details #${log.id}</h5>
-    //             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    //             </div>
-    //             <div class="modal-body">
-    //             <pre>${JSON.stringify(log.changes, null, 2)}</pre>
-    //             </div>
-    //         </div>
-    //         </div>
-    //     `;
-
-    //     document.body.appendChild(modal);
-
-    //     const bsModal = new bootstrap.Modal(modal, {
-    //         // 这些用默认即可；写出来更直观
-    //         backdrop: true,
-    //         focus: true,
-    //         keyboard: true
-    //     });
-
-    //     bsModal.show();
-
-    //     modal.addEventListener('hidden.bs.modal', () => {
-    //         bsModal.dispose();
-    //         document.body.removeChild(modal);
-    //     });
-    // }
 
     function listen() {
         form_search.addEventListener('submit', async e => {
@@ -219,22 +172,3 @@
         });
     }
 })();
-
-// 侧边栏按钮添加函数
-// function addLogButtonToSidebar() {
-//     const sidebars = document.querySelectorAll('.sidebar');
-
-//     sidebars.forEach(sidebar => {
-//         if (!sidebar.querySelector('#log_btn')) {
-//             const logBtn = document.createElement('a');
-//             logBtn.id = 'log_btn';
-//             logBtn.innerHTML = 'Operation Log';
-//             logBtn.href = 'log.html';
-//             logBtn.className = 'btn btn-outline-primary btn-block btn-sm';
-//             sidebar.appendChild(logBtn);
-//         }
-//     });
-// }
-
-// // 在DOM加载完成后调用
-// document.addEventListener('DOMContentLoaded', addLogButtonToSidebar);

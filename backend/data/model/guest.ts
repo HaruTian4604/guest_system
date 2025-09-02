@@ -62,16 +62,12 @@ import { Invalid_argument } from '../../error/invalid_argument';
 
 export class Guest extends Base {
   static tableName = 'guests';
-  // 新增：读取走视图（前面 Base 已支持）
   static viewName  = 'view_guests';
 
-  // 搜索字段（关键词查询会用到）
   static searchable = ['full_name'];
 
-  // 允许写入/更新的字段（不包含 status）
   static fillable   = ['full_name', 'date_of_birth', 'note', 'archived'];
 
-  // 读取字段（返回给前端）；包含视图中的 status
   static columns: string | string[] =
     'id, full_name, date_of_birth, note, archived, status';
 

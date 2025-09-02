@@ -86,6 +86,90 @@ function value2form(row, form = form_main) {
   }
 }
 
+// ---------- 通用表格渲染 ----------
+
+function list2table({ table, rows, columns }) {
+  const tbody = table.tBodies[0] || table.createTBody();
+  tbody.innerHTML = '';
+
+  const fmtYMD = (v) => {
+    if (!v) return '-';
+    if (window.Details && typeof Details.formatYMD === 'function') return Details.formatYMD(v);
+    const s = String(v);
+    if (/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    const d = new Date(s);
+    if (isNaN(d)) return s;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
+  };
+
+  const badgeHtml = (status) => {
+    if (!status) return '-';
+    const v = String(status).toLowerCase();
+    let klass = 'badge-secondary';
+    if (v === 'active' || v === 'available' || v === 'placed') klass = 'badge-success';
+    else if (v === 'upcoming') klass = 'badge-info';
+    else if (v === 'unplaced' || v === 'unavailable') klass = 'badge-warning';
+    return `<span class="badge ${klass}">${v}</span>`;
+  };
+
+  const tpl = (template, row) =>
+    String(template).replace(/\{(\w+)\}/g, (_, k) => row[k] ?? '');
+
+  for (const it of rows || []) {
+    const tr = document.createElement('tr');
+
+    for (const col of columns) {
+      const td = document.createElement('td');
+
+      if (typeof col.render === 'function') {
+        td.innerHTML = col.render(it);
+        tr.appendChild(td);
+        continue;
+      }
+
+      const type = col.type || 'text';
+
+      if (type === 'link') {
+        const href = tpl(col.href || '#', it);
+        const text = tpl(col.text || `{${col.field || 'id'}}`, it);
+        td.innerHTML = `<a class="link-id" href="${href}" title="${text}">${text}</a>`;
+        tr.appendChild(td);
+        continue;
+      }
+
+      let val = col.field ? it[col.field] : '';
+
+      if (val == null || val === '') {
+        td.textContent = '-';
+        tr.appendChild(td);
+        continue;
+      }
+
+      if (type === 'date') {
+        td.textContent = fmtYMD(val);
+      } else if (type === 'status') {
+        td.innerHTML = badgeHtml(val);
+      } else {
+        td.textContent = String(val);
+      }
+
+      tr.appendChild(td);
+    }
+
+    tr.dataset.id = it.id; // 方便点击行内按钮时取 ID
+    tbody.appendChild(tr);
+  }
+}
+
+// 不依赖“全局 rows”的查找器
+function findIn(list, id) {
+  return (list || []).find(it => String(it.id) === String(id));
+}
+
 /**
  * 表单开关
  */
@@ -169,6 +253,12 @@ function attach_pager_events(containerEl, pager) {
   });
 }
 
+// 放行 <a> 默认跳转（防止页面自己的委托拦截到链接）
+document.addEventListener('click', (e) => {
+  const a = e.target && e.target.closest && e.target.closest('a.link-id');
+  if (a) return; // 不阻止
+}, true);
+
 window.attach_pager_events = attach_pager_events; // 导出给页面用
 
 window.api = api
@@ -176,8 +266,10 @@ window.api = api
 window.admin = {
   list,
   find,
+  findIn,
   form2value,
   value2form,
+  list2table,
   to_querystring,
   toggle_form,
 }

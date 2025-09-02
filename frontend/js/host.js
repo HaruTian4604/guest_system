@@ -47,6 +47,83 @@ async function list_and_render() {
   }
 }
 
+// function render_table(list) {
+//   const e_tbody = table_main.tBodies[0]
+//   e_tbody.innerHTML = ''
+
+//   if (!list || list.length === 0) {
+//     e_tbody.innerHTML = `<tr><td colspan="3" class="text-center">No hosts found</td></tr>`
+//     return
+//   }
+
+//   for (let it of list) {
+//     const tr = document.createElement('tr')
+//     tr.dataset.id = it.id
+
+//     tr.innerHTML = `
+//       <td>${it.id}</td>
+//       <td><a href="host-detail.html?id=${it.id}">${it.full_name || '-'}</a></td>
+//       <td>
+//         <div class="op btn-group">
+//           <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
+//           <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
+//         </div>
+//       </td>
+//     `
+//     e_tbody.appendChild(tr)
+//   }
+
+//   if (!state.table_listening) {
+//     state.table_listening = true
+//     e_tbody.addEventListener('click', async e => {
+//       const op = e.target.closest('.op')
+//       const tr = e.target.closest('tr')
+//       if (!tr) return
+
+//       const id = tr.dataset.id
+
+//       if (op) {
+//         if (e.target.classList.contains('op_update')) {
+//           show_form(form_main)
+//           const row = admin.find(id)
+//           admin.value2form(row)
+//         }
+
+//         if (e.target.classList.contains('op_delete')) {
+//           if (!confirm('Are you sure you want to delete this host?')) return
+
+//           const r = await api('host/delete', { id })
+//           if (r.ok) {
+//             await list_and_render()
+//             yo_success('Host deleted successfully')
+//           } else {
+//             if (r.error.includes('foreign key constraint')) {
+//               const regex = /foreign key constraint fails \(`([\w]+)`\.`([\w]+)`, CONSTRAINT `([\w]+)`/;
+//               const match = r.error.match(regex);
+
+//               if (match && match[2] && match[1]) {
+//                 const table = match[2];
+//                 yo_error(`Cannot delete the host. Because it is linked to a [${table}] record. Please handle that then try again.`);
+//               } else {
+//                 yo_error('Cannot delete the host due to foreign key constraint.');
+//               }
+//             } else if (r.error.includes('not found')) {
+//               yo_error('The host record does not exist.');
+//             } else if (r.error.includes('incorrect integer value')) {
+//               yo_error('Invalid host ID. Please try again.');
+//             } else if (r.error.includes('permission denied')) {
+//               yo_error('You do not have permission to delete this host.');
+//             } else if (r.error.includes('deadlock')) {
+//               yo_error('A conflict occurred while processing your request. Please try again later.');
+//             } else {
+//               yo_error(`Error: ${r.error}`);
+//             }
+//           }
+//         }
+//       }
+//     })
+//   }
+// }
 function render_table(list) {
   const e_tbody = table_main.tBodies[0]
   e_tbody.innerHTML = ''
@@ -56,51 +133,49 @@ function render_table(list) {
     return
   }
 
-  for (let it of list) {
-    const tr = document.createElement('tr')
-    tr.dataset.id = it.id
-
-    tr.innerHTML = `
-      <td>${it.id}</td>
-      <td><a href="host-detail.html?id=${it.id}">${it.full_name || '-'}</a></td>
-      <td>
-        <div class="op btn-group">
-          <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
-          <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
-        </div>
-      </td>
-    `
-    e_tbody.appendChild(tr)
-  }
+  admin.list2table({
+    table: table_main,
+    rows: list,
+    columns: [
+      { field: 'id' },
+      { type: 'link', href: 'host-detail.html?id={id}', text: '{full_name}' },
+      {
+        render: () => `
+          <div class="op btn-group">
+            <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
+            <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
+          </div>`
+      },
+    ],
+  });
 
   if (!state.table_listening) {
     state.table_listening = true
     e_tbody.addEventListener('click', async e => {
+      if (e.target.closest('a')) return; // 放行链接
       const op = e.target.closest('.op')
       const tr = e.target.closest('tr')
       if (!tr) return
-
       const id = tr.dataset.id
 
       if (op) {
         if (e.target.classList.contains('op_update')) {
           show_form(form_main)
-          const row = admin.find(id)
+          const row = admin.findIn(rows, id)  // ← 这里改了
           admin.value2form(row)
         }
 
         if (e.target.classList.contains('op_delete')) {
           if (!confirm('Are you sure you want to delete this host?')) return
-
           const r = await api('host/delete', { id })
           if (r.ok) {
             await list_and_render()
             yo_success('Host deleted successfully')
           } else {
+            // 保留你原来的错误分支
             if (r.error.includes('foreign key constraint')) {
               const regex = /foreign key constraint fails \(`([\w]+)`\.`([\w]+)`, CONSTRAINT `([\w]+)`/;
               const match = r.error.match(regex);
-
               if (match && match[2] && match[1]) {
                 const table = match[2];
                 yo_error(`Cannot delete the host. Because it is linked to a [${table}] record. Please handle that then try again.`);
@@ -124,6 +199,7 @@ function render_table(list) {
     })
   }
 }
+
 
 function show_form(form) {
   form.hidden = false

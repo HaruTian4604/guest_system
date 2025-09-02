@@ -71,6 +71,79 @@ async function list_and_render() {
   }
 }
 
+// function render_table(list) {
+//   const e_tbody = table_main.tBodies[0]
+//   e_tbody.innerHTML = ''
+
+//   if (!list || list.length === 0) {
+//     e_tbody.innerHTML = `<tr><td colspan="6" class="text-center">No accommodations found</td></tr>`
+//     return
+//   }
+
+//   for (let it of list) {
+//     const tr = document.createElement('tr')
+//     tr.dataset.id = it.id
+
+//     tr.innerHTML = `
+//       <td>${it.id}</td>
+//       <td><a href="accommodation-detail.html?id=${it.id}">${it.address || '-'}</a></td>
+//       <td>${it.postcode || '-'}</td>
+//       <td><a href="host-detail.html?id=${it.host_id}">${it.host_name || '-'}</a></td>
+//       <td><span class="badge ${it.status === 'available' ? 'badge-success' : 'badge-warning'}">${it.status}</span></td>
+//       <td>
+//         <div class="op btn-group">
+//           <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
+//           <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
+//         </div>
+//       </td>
+//     `
+//     e_tbody.appendChild(tr)
+//   }
+
+//   if (!state.table_listening) {
+//     state.table_listening = true
+//     e_tbody.addEventListener('click', async e => {
+//       const op = e.target.closest('.op')
+//       const tr = e.target.closest('tr')
+//       if (!tr) return
+
+//       const id = tr.dataset.id
+
+//       if (op) {
+//         if (e.target.classList.contains('op_update')) {
+//           show_form(form_main)
+//           const row = admin.find(id)
+//           admin.value2form(row)
+//           await loadHostOptions(); // Reload options
+//         }
+
+//         if (e.target.classList.contains('op_delete')) {
+//           if (!confirm('Are you sure you want to delete this accommodation?')) return
+
+//           const r = await api('accommodation/delete', { id })
+//           if (r.ok) {
+//             await list_and_render()
+//             yo_success('Accommodation deleted successfully')
+//           } else {
+//             if (r.error.includes('foreign key constraint')) {
+//               const regex = /foreign key constraint fails \(`([\w]+)`\.`([\w]+)`, CONSTRAINT `([\w]+)`/;
+//               const match = r.error.match(regex);
+
+//               if (match && match[2] && match[1]) {
+//                 const table = match[2]; // e.g., `placements`
+//                 yo_error(`Cannot delete the accommodation. Because it is linked to a [${table}] record. Please handle that then try again.`);
+//               } else {
+//                 yo_error('Cannot delete the accommodation due to foreign key constraint.');
+//               }
+//             } else {
+//               yo_error(`Error: ${r.error}`);
+//             }
+//           }
+//         }
+//       }
+//     })
+//   }
+// }
 function render_table(list) {
   const e_tbody = table_main.tBodies[0]
   e_tbody.innerHTML = ''
@@ -80,46 +153,44 @@ function render_table(list) {
     return
   }
 
-  for (let it of list) {
-    const tr = document.createElement('tr')
-    tr.dataset.id = it.id
-
-    tr.innerHTML = `
-      <td>${it.id}</td>
-      <td><a href="accommodation-detail.html?id=${it.id}">${it.address || '-'}</a></td>
-      <td>${it.postcode || '-'}</td>
-      <td><a href="host-detail.html?id=${it.host_id}">${it.host_name || '-'}</a></td>
-      <td><span class="badge ${it.status === 'available' ? 'badge-success' : 'badge-warning'}">${it.status}</span></td>
-      <td>
-        <div class="op btn-group">
-          <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
-          <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
-        </div>
-      </td>
-    `
-    e_tbody.appendChild(tr)
-  }
+  admin.list2table({
+    table: table_main,
+    rows: list,
+    columns: [
+      { field: 'id' },
+      { type: 'link', href: 'accommodation-detail.html?id={id}', text: '{address}' },
+      { field: 'postcode' },
+      { type: 'link', href: 'host-detail.html?id={host_id}', text: '{host_name}' },
+      { field: 'status', type: 'status' },
+      {
+        render: () => `
+          <div class="op btn-group">
+            <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
+            <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
+          </div>`
+      },
+    ],
+  });
 
   if (!state.table_listening) {
     state.table_listening = true
     e_tbody.addEventListener('click', async e => {
+      if (e.target.closest('a')) return; // 放行链接
       const op = e.target.closest('.op')
       const tr = e.target.closest('tr')
       if (!tr) return
-
       const id = tr.dataset.id
 
       if (op) {
         if (e.target.classList.contains('op_update')) {
           show_form(form_main)
-          const row = admin.find(id)
+          const row = admin.findIn(rows, id)   // ← 这里改了
           admin.value2form(row)
-          await loadHostOptions(); // Reload options
+          await loadHostOptions();
         }
 
         if (e.target.classList.contains('op_delete')) {
           if (!confirm('Are you sure you want to delete this accommodation?')) return
-
           const r = await api('accommodation/delete', { id })
           if (r.ok) {
             await list_and_render()
@@ -128,9 +199,8 @@ function render_table(list) {
             if (r.error.includes('foreign key constraint')) {
               const regex = /foreign key constraint fails \(`([\w]+)`\.`([\w]+)`, CONSTRAINT `([\w]+)`/;
               const match = r.error.match(regex);
-
               if (match && match[2] && match[1]) {
-                const table = match[2]; // e.g., `placements`
+                const table = match[2];
                 yo_error(`Cannot delete the accommodation. Because it is linked to a [${table}] record. Please handle that then try again.`);
               } else {
                 yo_error('Cannot delete the accommodation due to foreign key constraint.');
@@ -144,6 +214,7 @@ function render_table(list) {
     })
   }
 }
+
 
 function show_form(form) {
   form.hidden = false

@@ -4,6 +4,7 @@ import { get_connection } from '../../boot/database';
 
 export class Log extends Base {
   static table = 'operation_log';
+  static searchable = ['operation_type', 'operator_name', 'operation_type', 'changes'];
 
   static async list(
     page = 1,
@@ -17,7 +18,6 @@ export class Log extends Base {
       let query = `SELECT * FROM ${this.table}`;
       const params: any[] = [];
 
-      // 简单的关键词搜索
       if (keyword) {
         query += ` WHERE table_name LIKE ? OR operator_name LIKE ? OR operation_type LIKE ?`;
         params.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`);
