@@ -174,8 +174,8 @@ function render_table(list) {
       { type: 'link', href: 'host-detail.html?id={host_id}', text: '{host_name}' },
       { type: 'link', href: 'accommodation-detail.html?id={accommodation_id}', text: '{accommodation_address} {accommodation_postcode}' },
       { field: 'start_date', type: 'date' },
-      { field: 'end_date',   type: 'date' },
-      { field: 'status',     type: 'status' },
+      { field: 'end_date', type: 'date' },
+      { field: 'status', type: 'status' },
       {
         render: () => `
           <div class="op btn-group">
@@ -198,8 +198,8 @@ function render_table(list) {
       if (op) {
         if (e.target.classList.contains('op_update')) {
           show_form(form_main)
-          const row = admin.findIn(rows, id) // ← 这里改了
-          admin.value2form(row)
+          const row = admin.findIn(rows, id);
+          admin.value2form(row, form_main);
         }
 
         if (e.target.classList.contains('op_delete')) {

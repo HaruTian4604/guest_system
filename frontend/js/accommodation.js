@@ -182,11 +182,17 @@ function render_table(list) {
       const id = tr.dataset.id
 
       if (op) {
+        // if (e.target.classList.contains('op_update')) {
+        //   show_form(form_main)
+        //   const row = admin.findIn(rows, id)   // ← 这里改了
+        //   admin.value2form(row)
+        //   await loadHostOptions();
+        // }
         if (e.target.classList.contains('op_update')) {
-          show_form(form_main)
-          const row = admin.findIn(rows, id)   // ← 这里改了
-          admin.value2form(row)
-          await loadHostOptions();
+          const row = admin.findIn(rows, id);
+          await loadHostOptions();          // 先把 <select> 选项准备好
+          show_form(form_main);
+          admin.value2form(row, form_main); // 把数据灌进当前表单
         }
 
         if (e.target.classList.contains('op_delete')) {

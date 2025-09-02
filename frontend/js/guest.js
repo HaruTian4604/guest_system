@@ -303,7 +303,7 @@ function validateName(name) {
   if (name == null) return false;
   const s = String(name).trim();
   if (!s || s.length > 64) return false;   // 长度 <= 64
-  if (/\d/.test(s)) return false;          // 不允许任何数字
+  if (/^[a-zA-Z0-9_-]{4,16}$/.test(s)) return false;          // 不允许任何数字
   // 如需更严格字符集，可用：/^[\p{L} .'-]{1,64}$/u
   return true;
 }

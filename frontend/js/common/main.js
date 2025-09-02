@@ -73,18 +73,55 @@ function form2value(form) {
   return row
 }
 
-function value2form(row, form = form_main) {
-  const requiredInput = ['id','full_name', 'date_of_birth'];
+function value2form(row, form) {
+  if (!form) throw new Error('value2form: form element required');
+  const fields = form.querySelectorAll('[name]');
 
-  for (let key of requiredInput) {
-    if (row.hasOwnProperty(key)) {
-      const input = form.querySelector(`[name="${key}"]`)
-      if (input) {
-        input.value = row[key]
-      }
+  for (const el of fields) {
+    const key = el.name;
+    if (!(key in row)) continue;
+
+    let val = row[key];
+    if (val == null) {
+      if (el.type === 'checkbox') el.checked = false;
+      else el.value = '';
+      continue;
     }
+
+    // 统一字符串
+    const asStr = (v) => v == null ? '' : String(v);
+
+    if (el.tagName === 'SELECT') {
+      el.value = asStr(val);        // 选项已存在时会正确选中
+      continue;
+    }
+
+    if (el.type === 'date') {
+      let s = asStr(val);
+      if (/^\d{4}-\d{2}-\d{2}T/.test(s)) s = s.slice(0, 10);   // ISO -> YYYY-MM-DD
+      else if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+        const d = new Date(s);
+        if (!isNaN(d)) {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const dd = String(d.getDate()).padStart(2, '0');
+          s = `${y}-${m}-${dd}`;
+        }
+      }
+      el.value = s;
+      continue;
+    }
+
+    if (el.type === 'checkbox') {
+      el.checked = (val === true || val === 1 || val === '1' || val === 'true');
+      continue;
+    }
+
+    // 默认文本/数字等
+    el.value = asStr(val);
   }
 }
+
 
 // ---------- 通用表格渲染 ----------
 
