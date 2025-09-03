@@ -194,7 +194,7 @@
 
 ## Notes
 
-* **Date format**: `DD-MM-YYYY`
+* **Date format**: `YYYY-MM-DD`
 * **Postcodes**: UK standard format
 * **Status values**:
 
