@@ -1,114 +1,144 @@
-# Guest Management System API Doc
+# Refugee / Guest Management System
 
-## Data Models
+This document describes the database schema, data formats, search behavior, and HTTP APIs as they actually work in this codebase.
 
-### `Accommodation`
+> **Key principles**
+>
+> * **Dates** are stored and exchanged as `YYYY-MM-DD` strings.
+> * **Status values are not stored** in base tables. They are **derived in SQL views** (`view_*`).
+> * All *list* endpoints accept `page`, `limit`, and optional `keyword`, which is applied to model-defined *searchable* fields.
 
-```ts
-{
-  id: number               // unique identifier (PK)
-  address: string          // full street address
-  postcode: string         // UK postcode (e.g. "SW1A 1AA")
-  host_id: number          // reference to primary_host (FK)
-  status: string           // accommodation status - must be one of: ['available', 'unavailable']
-}
-```
+---
 
-### `PrimaryHost`
+## Database Schema (MySQL)
 
-```ts
-{
-  id: number               // unique identifier (PK)
-  full_name: string        // host's full legal name
-}
-```
+### Tables
 
-### `Guest`
+#### `users`
 
-```ts
-{
-  id: number               // unique identifier (PK)
-  full_name: string        // guest's full legal name
-  date_of_birth: string    // birth date in DD-MM-YYYY format (e.g. "15-05-1985")
-  status: string           // guest status - must be one of: ['placed', 'unplaced']
-}
-```
+* `id` (INT, PK, auto increment)
+* `name` (VARCHAR) – username or display name
+* `token` (VARCHAR) – authentication token
+* `role_index` (INT) – role indicator (e.g. 1 = admin, 2 = caseworker)
 
-### `Placement`
+#### `accommodations`
 
-```ts
-{
-  id: number               // unique identifier (PK)
-  guest_id: number         // reference to guest (FK)
-  host_id: number          // reference to primary_host (FK)
-  accommodation_id: number // reference to accommodation (FK)
-  start_date: string       // placement start date in DD-MM-YYYY format
-  end_date: string         // placement end date in DD-MM-YYYY format (nullable if ongoing)
-}
-```
+* `id` (INT, PK)
+* `address` (VARCHAR(255), NOT NULL)
+* `postcode` (VARCHAR(20), NOT NULL)
+* `host_id` (FK → hosts.id)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
 
-## URL Structure Convention
+#### `guests`
 
-All API endpoints follow the structure:
+* `id` (INT, PK)
+* `full_name` (VARCHAR(255), NOT NULL)
+* `date_of_birth` (DATE, NOT NULL)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
 
-```
-/api/{model}/{action}
-```
+#### `hosts`
 
-For example, to create a new accommodation record, the full API URL would be:
+* `id` (INT, PK)
+* `full_name` (VARCHAR(255), NOT NULL)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
 
-```
-https://xxx.com/api/accommodation/create
-```
+#### `placements`
 
-## Accommodation Management API
+* `id` (INT, PK)
+* `guest_id` (FK → guests.id)
+* `host_id` (FK → hosts.id)
+* `accommodation_id` (FK → accommodations.id)
+* `start_date` (DATE, NOT NULL)
+* `end_date` (DATE, nullable)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
+* **Constraints**:
 
-| Endpoint               | Parameters                                                                 | Description                                      | Example                                                                 |
-| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- |
-| `accommodation/create` | `address: string`, `postcode: string`, `host_id: number`, `status: string` | Create new accommodation                        | `{ "address": "10 Downing St", "postcode": "SW1A 2AA", "host_id": 1, "status": "available" }` |
-| `accommodation/delete` | `id: number`                                                               | Delete accommodation by ID                      | `{ "id": 1 }`                                                           |
-| `accommodation/update` | `id: number`, `Accommodation?`                                             | Update accommodation details                    | `{ "id": 1, "status": "unavailable" }`                                 |
-| `accommodation/list`   | `page?: number`                                                            | List accommodations (pagination)                | `{ "page": 1 }`                                                         |
-| `accommodation/pick`   | `id: number`                                                               | Get accommodation details by ID                 | `{ "id": 1 }`                                                           |
-| `accommodation/search` | `postcode?: string`, `status?: string`                                     | Search by postcode or status                    | `{ "postcode": "SW1A", "status": "available" }`                         |
+  * `end_date` must be ≥ `start_date` or NULL.
+  * **Triggers**: reject overlapping active intervals for the same guest or accommodation.
 
-## Primary Host Management API
+#### `operation_log`
 
-| Endpoint          | Parameters                     | Description                      | Example                                      |
-| ----------------- | ------------------------------ | -------------------------------- | -------------------------------------------- |
-| `host/create`     | `full_name: string`            | Create new primary host          | `{ "full_name": "John Smith" }`              |
-| `host/delete`     | `id: number`                   | Delete host by ID                | `{ "id": 1 }`                                |
-| `host/update`     | `id: number`, `PrimaryHost?`   | Update host details              | `{ "id": 1, "full_name": "Jonathan Smith" }` |
-| `host/list`       | `page?: number`                | List hosts (pagination)          | `{ "page": 1 }`                              |
-| `host/pick`       | `id: number`                   | Get host details by ID           | `{ "id": 1 }`                                |
-| `host/search`     | `full_name?: string`           | Search hosts by name             | `{ "full_name": "Smith" }`                   |
+* `id` (BIGINT, PK)
+* `operation_time` (DATETIME, default now)
+* `operation_type` (ENUM: CREATE, UPDATE, DELETE, STATUS\_CHANGE, ARCHIVE)
+* `table_name` (ENUM: guests, hosts, placements, accommodations)
+* `record_id` (INT)
+* `operator_id` (INT)
+* `operator_name` (VARCHAR(100))
+* `changes` (JSON) – field-level diffs
+* `uk_formatted_date` (VIRTUAL) – formatted `dd/mm/yyyy hh:mm`
 
-## Guest Management API
+---
 
-| Endpoint        | Parameters                                                                 | Description                      | Example                                                                 |
-| --------------- | -------------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------- |
-| `guest/create`  | `full_name: string`, `date_of_birth: string`, `status: string`             | Create new guest                 | `{ "full_name": "Ahmed Khan", "date_of_birth": "12-08-1990", "status": "unplaced" }` |
-| `guest/delete`  | `id: number`                                                               | Delete guest by ID               | `{ "id": 1 }`                                                           |
-| `guest/update`  | `id: number`, `Guest?`                                                     | Update guest details             | `{ "id": 1, "status": "placed" }`                                       |
-| `guest/list`    | `page?: number`                                                            | List guests (pagination)         | `{ "page": 1 }`                                                         |
-| `guest/pick`    | `id: number`                                                               | Get guest details by ID          | `{ "id": 1 }`                                                           |
-| `guest/search`  | `full_name?: string`, `status?: string`                                    | Search guests by name or status  | `{ "full_name": "Khan", "status": "unplaced" }`                         |
+### Views (derived status)
 
-## Placement Management API
+* **`view_guests`** → adds `status`: `placed` if guest has an active placement today; otherwise `unplaced`.
+* **`view_accommodations`** → adds `status`: `unavailable` if in active placement today; otherwise `available`. Also includes `host_name`.
+* **`view_placements`** → adds joined guest/host/accommodation names and `status`:
 
-| Endpoint          | Parameters                                                                             | Description                      | Example                                                                 |
-| ----------------- | -------------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------- |
-| `placement/create`| `guest_id: number`, `host_id: number`, `accommodation_id: number`, `start_date: string` | Create new placement             | `{ "guest_id": 1, "host_id": 1, "accommodation_id": 1, "start_date": "01-06-2023" }` |
-| `placement/delete`| `id: number`                                                                           | Delete placement by ID           | `{ "id": 1 }`                                                           |
-| `placement/update`| `id: number`, `Placement?`                                                             | Update placement details         | `{ "id": 1, "end_date": "30-06-2023" }`                                |
-| `placement/list`  | `page?: number`                                                                        | List placements (pagination)     | `{ "page": 1 }`                                                         |
-| `placement/pick`  | `id: number`                                                                           | Get placement details by ID      | `{ "id": 1 }`                                                           |
-| `placement/search`| `guest_id?: number`, `accommodation_id?: number`, `status?: string`                    | Search placements               | `{ "guest_id": 1, "status": "active" }`                                 |
+  * `upcoming` = start date in future
+  * `active` = no end date or end date ≥ today
+  * `completed` = ended before today
 
-## Notes on Data Formats:
-- All dates must be in DD-MM-YYYY format (e.g. "15-05-1985")
-- UK postcodes must follow standard format (e.g. "SW1A 1AA", "M1 1AE", "EH12 9SY")
-- Status fields have specific allowed values:
-  - Accommodation: ['available', 'unavailable']
-  - Guest: ['placed', 'unplaced']
-- Names should be stored as full legal names (first name + surname)
+---
+
+## Data Formats
+
+* **Dates**: `YYYY-MM-DD`
+* **Dashboard month labels**: `YYYY-MM`
+
+---
+
+## Search & Pagination
+
+All list endpoints support:
+
+* `page`, `limit`, `keyword`
+* `keyword` is matched against each model’s `searchable` fields (`LIKE %keyword%`)
+
+### Searchable fields by model
+
+* **Guest** → `full_name`
+* **Accommodation** → `address`, `postcode`, `host`
+* **Placement** → `guest_name`, `host_name`, `accommodation_address`, `accommodation_postcode`
+* **Log** → `operation_type`, `operator_name`, `operation_type`, `changes`
+
+---
+
+## API Patterns
+
+### CRUD endpoints
+
+* `/{entity}/list` – list with paging and keyword search
+* `/{entity}/pick` – get by ID
+* `/{entity}/create` – insert record
+* `/{entity}/update` – update by ID
+* `/{entity}/delete` – soft delete by ID
+
+### Dashboard endpoints
+
+* `/guest-dashboard` → `{ ok, total, placed_count, unplaced_count }`
+* `/accommodation-dashboard` → `{ ok, total, available_count, unavailable_count }`
+* `/placement-dashboard` → `{ ok, items: [{ month: "YYYY-MM", count: number }] }`
+
+---
+
+## Entity Create/Update requirements
+
+* **Guest** → full\_name, date\_of\_birth (YYYY-MM-DD), note optional
+* **Host** → full\_name, note optional
+* **Accommodation** → address, postcode, host\_id, note optional
+* **Placement** → guest\_id, host\_id, accommodation\_id, start\_date (YYYY-MM-DD); end\_date optional; note optional
+
+---
+
+## Logging
+
+All writes (create, update, delete, archive, status changes) are recorded into `operation_log`.
+The Logs UI provides list + keyword search + detail JSON view.
+
+---
