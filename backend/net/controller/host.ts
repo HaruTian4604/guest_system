@@ -82,7 +82,6 @@ export const host_list_by_accommodation = async (req, res) => {
         a.id,
         a.address,
         a.postcode,
-        a.status,
         COUNT(p.id) AS active_placements
       FROM accommodations a
       LEFT JOIN placements p ON a.id = p.accommodation_id
