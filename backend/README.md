@@ -1,206 +1,144 @@
 # Refugee / Guest Management System
 
+This document describes the database schema, data formats, search behavior, and HTTP APIs as they actually work in this codebase.
+
+> **Key principles**
+>
+> * **Dates** are stored and exchanged as `YYYY-MM-DD` strings.
+> * **Status values are not stored** in base tables. They are **derived in SQL views** (`view_*`).
+> * All *list* endpoints accept `page`, `limit`, and optional `keyword`, which is applied to model-defined *searchable* fields.
+
+---
+
 ## Database Schema (MySQL)
 
 ### Tables
 
 #### `users`
 
-* `id` – primary key, auto increment
-* `name` – username or display name
-* `token` – auth token for API calls
-* `role_index` – user role (1 = admin, 2 = caseworker, …)
+* `id` (INT, PK, auto increment)
+* `name` (VARCHAR) – username or display name
+* `token` (VARCHAR) – authentication token
+* `role_index` (INT) – role indicator (e.g. 1 = admin, 2 = caseworker)
 
 #### `accommodations`
 
-* `id` – primary key
-* `address` – full street address
-* `postcode` – UK postcode
-* `host_id` – foreign key → `hosts.id`
-* `archived` – soft delete flag (0 = active, 1 = archived)
-* `note` – free text notes (optional)
+* `id` (INT, PK)
+* `address` (VARCHAR(255), NOT NULL)
+* `postcode` (VARCHAR(20), NOT NULL)
+* `host_id` (FK → hosts.id)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
 
 #### `guests`
 
-* `id` – primary key
-* `full_name` – guest’s legal name
-* `date_of_birth` – birth date (date)
-* `archived` – soft delete flag
-* `note` – free text notes (optional)
+* `id` (INT, PK)
+* `full_name` (VARCHAR(255), NOT NULL)
+* `date_of_birth` (DATE, NOT NULL)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
 
 #### `hosts`
 
-* `id` – primary key
-* `full_name` – host’s legal name
-* `archived` – soft delete flag
-* `note` – free text notes (optional)
+* `id` (INT, PK)
+* `full_name` (VARCHAR(255), NOT NULL)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
 
 #### `placements`
 
-* `id` – primary key
-* `guest_id` – foreign key → `guests.id`
-* `host_id` – foreign key → `hosts.id`
-* `accommodation_id` – foreign key → `accommodations.id`
-* `start_date` – placement start date
-* `end_date` – placement end date (nullable if ongoing)
-* `archived` – soft delete flag
-* `note` – free text notes (optional)
+* `id` (INT, PK)
+* `guest_id` (FK → guests.id)
+* `host_id` (FK → hosts.id)
+* `accommodation_id` (FK → accommodations.id)
+* `start_date` (DATE, NOT NULL)
+* `end_date` (DATE, nullable)
+* `archived` (TINYINT(1), default 0)
+* `note` (TEXT, nullable)
 * **Constraints**:
 
-  * End date must be after or equal to start date (or null).
-  * **Triggers**: no overlapping placements for the same guest or accommodation.
+  * `end_date` must be ≥ `start_date` or NULL.
+  * **Triggers**: reject overlapping active intervals for the same guest or accommodation.
 
 #### `operation_log`
 
-* `id` – primary key
-* `operation_time` – timestamp (default current)
-* `operation_type` – one of: CREATE, UPDATE, DELETE, STATUS\_CHANGE, ARCHIVE
-* `table_name` – one of: guests, hosts, placements, accommodations
-* `record_id` – affected record ID
-* `operator_id` – ID of the user who made the change
-* `operator_name` – name of the operator
-* `changes` – JSON with field-level details
-* `uk_formatted_date` – virtual field (dd/mm/yyyy hh\:mm)
-
-### Views
-
-* **view\_accommodations** – joins host info, computes status (available / unavailable).
-* **view\_guests** – computes status (placed / unplaced).
-* **view\_placements** – joins guest, host, accommodation, computes status (upcoming / active / completed).
+* `id` (BIGINT, PK)
+* `operation_time` (DATETIME, default now)
+* `operation_type` (ENUM: CREATE, UPDATE, DELETE, STATUS\_CHANGE, ARCHIVE)
+* `table_name` (ENUM: guests, hosts, placements, accommodations)
+* `record_id` (INT)
+* `operator_id` (INT)
+* `operator_name` (VARCHAR(100))
+* `changes` (JSON) – field-level diffs
+* `uk_formatted_date` (VIRTUAL) – formatted `dd/mm/yyyy hh:mm`
 
 ---
 
-## Data Models (App Layer)
+### Views (derived status)
 
-### `User`
+* **`view_guests`** → adds `status`: `placed` if guest has an active placement today; otherwise `unplaced`.
+* **`view_accommodations`** → adds `status`: `unavailable` if in active placement today; otherwise `available`. Also includes `host_name`.
+* **`view_placements`** → adds joined guest/host/accommodation names and `status`:
 
-```ts
-{
-  id: number,
-  name: string,
-  token: string,
-  roleIndex: number  // 1 = admin, 2 = caseworker ...
-}
-```
-
-### `Accommodation`
-
-```ts
-{
-  id: number,
-  address: string,
-  postcode: string,
-  host_id: number,
-  status: 'available' | 'unavailable',
-  note?: string
-}
-```
-
-### `Host`
-
-```ts
-{
-  id: number,
-  full_name: string,
-  note?: string
-}
-```
-
-### `Guest`
-
-```ts
-{
-  id: number,
-  full_name: string,
-  date_of_birth: string,   // format: DD-MM-YYYY
-  status: 'placed' | 'unplaced',
-  note?: string
-}
-```
-
-### `Placement`
-
-```ts
-{
-  id: number,
-  guest_id: number,
-  host_id: number,
-  accommodation_id: number,
-  start_date: string,   // DD-MM-YYYY
-  end_date?: string,    // DD-MM-YYYY or null
-  note?: string
-}
-```
+  * `upcoming` = start date in future
+  * `active` = no end date or end date ≥ today
+  * `completed` = ended before today
 
 ---
 
-## API Endpoints
+## Data Formats
 
-### User Management API
-
-| Endpoint      | Parameters                                           | Description      | Example                                                 |
-| ------------- | ---------------------------------------------------- | ---------------- | ------------------------------------------------------- |
-| `user/list`   |                                                      | List all users   |                                                         |
-| `user/pick`   | `id: number`                                         | Get user by ID   | `{ "id": 1 }`                                           |
-| `user/create` | `name: string`, `token: string`, `roleIndex: number` | Create new user  | `{ "name": "admin", "token": "12345", "roleIndex": 1 }` |
-| `user/update` | `id: number`, `User?`                                | Update user info | `{ "id": 1, "roleIndex": 2 }`                           |
-| `user/delete` | `id: number`                                         | Delete user      | `{ "id": 1 }`                                           |
-
-### Accommodation Management API
-
-| Endpoint               | Parameters                                 | Description                |
-| ---------------------- | ------------------------------------------ | -------------------------- |
-| `accommodation/create` | `address`, `postcode`, `host_id`, `status` | Create new accommodation   |
-| `accommodation/delete` | `id`                                       | Delete accommodation by ID |
-| `accommodation/update` | `id`, `Accommodation?`                     | Update accommodation       |
-| `accommodation/list`   | `page?`                                    | List accommodations        |
-| `accommodation/pick`   | `id`                                       | Get accommodation details  |
-| `accommodation/search` | `postcode?`, `status?`                     | Search by postcode/status  |
-
-### Host Management API
-
-| Endpoint      | Parameters    | Description          |
-| ------------- | ------------- | -------------------- |
-| `host/create` | `full_name`   | Create new host      |
-| `host/delete` | `id`          | Delete host by ID    |
-| `host/update` | `id`, `Host?` | Update host info     |
-| `host/list`   | `page?`       | List hosts           |
-| `host/pick`   | `id`          | Get host details     |
-| `host/search` | `full_name?`  | Search hosts by name |
-
-### Guest Management API
-
-| Endpoint       | Parameters                             | Description        |
-| -------------- | -------------------------------------- | ------------------ |
-| `guest/create` | `full_name`, `date_of_birth`, `status` | Create new guest   |
-| `guest/delete` | `id`                                   | Delete guest by ID |
-| `guest/update` | `id`, `Guest?`                         | Update guest       |
-| `guest/list`   | `page?`                                | List guests        |
-| `guest/pick`   | `id`                                   | Get guest details  |
-| `guest/search` | `full_name?`, `status?`                | Search guests      |
-
-### Placement Management API
-
-| Endpoint           | Parameters                                              | Description          |
-| ------------------ | ------------------------------------------------------- | -------------------- |
-| `placement/create` | `guest_id`, `host_id`, `accommodation_id`, `start_date` | Create new placement |
-| `placement/delete` | `id`                                                    | Delete placement     |
-| `placement/update` | `id`, `Placement?`                                      | Update placement     |
-| `placement/list`   | `page?`                                                 | List placements      |
-| `placement/pick`   | `id`                                                    | Get placement info   |
-| `placement/search` | `guest_id?`, `accommodation_id?`, `status?`             | Search placements    |
+* **Dates**: `YYYY-MM-DD`
+* **Dashboard month labels**: `YYYY-MM`
 
 ---
 
-## Notes
+## Search & Pagination
 
-* **Date format**: `YYYY-MM-DD`
-* **Postcodes**: UK standard format
-* **Status values**:
+All list endpoints support:
 
-  * Accommodation: `available | unavailable`
-  * Guest: `placed | unplaced`
-  * Placement (view): `upcoming | active | completed`
-* **User roles**: 1 = Admin, 2 = Caseworker (more can be added)
+* `page`, `limit`, `keyword`
+* `keyword` is matched against each model’s `searchable` fields (`LIKE %keyword%`)
+
+### Searchable fields by model
+
+* **Guest** → `full_name`
+* **Accommodation** → `address`, `postcode`, `host`
+* **Placement** → `guest_name`, `host_name`, `accommodation_address`, `accommodation_postcode`
+* **Log** → `operation_type`, `operator_name`, `operation_type`, `changes`
+
+---
+
+## API Patterns
+
+### CRUD endpoints
+
+* `/{entity}/list` – list with paging and keyword search
+* `/{entity}/pick` – get by ID
+* `/{entity}/create` – insert record
+* `/{entity}/update` – update by ID
+* `/{entity}/delete` – soft delete by ID
+
+### Dashboard endpoints
+
+* `/guest-dashboard` → `{ ok, total, placed_count, unplaced_count }`
+* `/accommodation-dashboard` → `{ ok, total, available_count, unavailable_count }`
+* `/placement-dashboard` → `{ ok, items: [{ month: "YYYY-MM", count: number }] }`
+
+---
+
+## Entity Create/Update requirements
+
+* **Guest** → full\_name, date\_of\_birth (YYYY-MM-DD), note optional
+* **Host** → full\_name, note optional
+* **Accommodation** → address, postcode, host\_id, note optional
+* **Placement** → guest\_id, host\_id, accommodation\_id, start\_date (YYYY-MM-DD); end\_date optional; note optional
+
+---
+
+## Logging
+
+All writes (create, update, delete, archive, status changes) are recorded into `operation_log`.
+The Logs UI provides list + keyword search + detail JSON view.
 
 ---
