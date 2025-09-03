@@ -1,8 +1,8 @@
 //backend/net/route.ts
 import { guest_create, guest_delete, guest_list, guest_pick, guest_update, guest_dashboard } from './controller/guest';
 import { host_create, host_delete, host_list, host_pick, host_update, host_list_by_accommodation, host_dashboard } from './controller/host';
-import { accommodation_create, accommodation_delete, accommodation_list, accommodation_pick, accommodation_update } from './controller/accommodation';
-import { placement_create, placement_delete, placement_list, placement_pick, placement_update, placement_list_by_accommodation, placement_list_by_guest } from './controller/placement';
+import { accommodation_create, accommodation_delete, accommodation_list, accommodation_pick, accommodation_update, accommodation_dashboard } from './controller/accommodation';
+import { placement_create, placement_delete, placement_list, placement_pick, placement_update, placement_list_by_accommodation, placement_list_by_guest, placement_dashboard } from './controller/placement';
 import { log_list } from './controller/log';
 import { requireRole } from './request';
 import { findUserByToken } from '../data/user/UserRepository';
@@ -43,7 +43,7 @@ export const route = {
   '/api/accommodation/pick': accommodation_pick,
   // '/api/accommodation-stats': accommodation_stats,
   // '/api/accommodation/list-by-host': accommodation_list_by_host,
-  // '/api/accommodation-dashboard': accommodation_dashboard,
+  '/api/accommodation-dashboard': accommodation_dashboard,
 
   '/api/placement/create': placement_create,
   '/api/placement/delete': requireRole('admin')(placement_delete),
@@ -53,5 +53,5 @@ export const route = {
   // '/api/placement/check-conflicts': placement_check_conflicts,
   '/api/placement/list-by-accommodation': placement_list_by_accommodation,
   '/api/placement/list-by-guest': placement_list_by_guest,
-  // '/api/placement-dashboard': placement_dashboard,
+  '/api/placement-dashboard': placement_dashboard,
 };

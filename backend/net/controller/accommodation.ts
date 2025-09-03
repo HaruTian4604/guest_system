@@ -47,3 +47,12 @@ export const accommodation_delete = async (req, res) => {
     return { ok: true };
   } catch (e) { return { ok: false, error: e.message }; }
 };
+
+export async function  accommodation_dashboard(req: Request, res: Response) {
+  try {
+    const stats = await Accommodation.getStats();
+    return{ ok: true, total: stats.total, available_count: stats.available, unavailable_count: stats.unavailable };
+  } catch (error) {
+    return { ok: false, error: error.message };
+  }
+};

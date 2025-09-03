@@ -62,11 +62,11 @@ import { Invalid_argument } from '../../error/invalid_argument';
 
 export class Guest extends Base {
   static tableName = 'guests';
-  static viewName  = 'view_guests';
+  static viewName = 'view_guests';
 
   static searchable = ['full_name'];
 
-  static fillable   = ['full_name', 'date_of_birth', 'note', 'archived'];
+  static fillable = ['full_name', 'date_of_birth', 'note', 'archived'];
 
   static columns: string | string[] =
     'id, full_name, date_of_birth, note, archived, status';
@@ -93,26 +93,26 @@ export class Guest extends Base {
   /**
    * Dashboard 统计
    */
-static async getStats(): Promise<{ placed: number; unplaced: number; total: number }> {
-  const conn = await get_connection();
-  try {
-    const [rows] = await conn.query<RowDataPacket[]>(
-      `SELECT
+  static async getStats(): Promise<{ placed: number; unplaced: number; total: number }> {
+    const conn = await get_connection();
+    try {
+      const [rows] = await conn.query<RowDataPacket[]>(
+        `SELECT
          SUM(CASE WHEN status = 'placed' COLLATE utf8mb4_0900_ai_ci THEN 1 ELSE 0 END) AS placed,
          SUM(CASE WHEN status = 'unplaced' COLLATE utf8mb4_0900_ai_ci THEN 1 ELSE 0 END) AS unplaced,
          COUNT(*) AS total
        FROM view_guests
        WHERE archived = 0`
-    );
-    const r = rows[0] || {} as any;
-    return {
-      placed:   Number(r.placed || 0),
-      unplaced: Number(r.unplaced || 0),
-      total:    Number(r.total || 0),
-    };
-  } finally {
-    conn.end();
+      );
+      const r = rows[0] || {} as any;
+      return {
+        placed: Number(r.placed || 0),
+        unplaced: Number(r.unplaced || 0),
+        total: Number(r.total || 0),
+      };
+    } finally {
+      conn.end();
+    }
   }
-}
 
 }

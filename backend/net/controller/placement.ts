@@ -27,10 +27,10 @@ export const placement_delete = async (req, res) => {
 export const placement_list = async (req, res) => {
   try {
     const q = req.$query || {};
-    const page   = Math.max(1, parseInt(String(q.page || '1'), 10));
-    const limit  = Math.max(1, Math.min(100, parseInt(String(q.limit || '10'), 10)));
-    const order  = String(q.order_by || 'start_date');
-    const desc   = String(q.desc || 'true') === 'true';
+    const page = Math.max(1, parseInt(String(q.page || '1'), 10));
+    const limit = Math.max(1, Math.min(100, parseInt(String(q.limit || '10'), 10)));
+    const order = String(q.order_by || 'start_date');
+    const desc = String(q.desc || 'true') === 'true';
     const keyword = (q.keyword || '').trim();
     const [rows, total] = await Promise.all([
       Placement.list(page, limit, order, desc, keyword),
@@ -67,5 +67,14 @@ export const placement_list_by_guest = async (req, res) => {
     return { ok: true, data: rows };
   } catch (e) {
     return { ok: false, error: e.message };
+  }
+};
+
+export async function placement_dashboard(req: Request, res: Response) {
+  try {
+    const items = await Placement.getEndingsNext12Months();
+    return { ok: true, items: items };
+  } catch (error) {
+    return { ok: false, error: error.message };
   }
 };

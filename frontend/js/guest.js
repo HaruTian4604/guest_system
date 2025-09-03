@@ -182,7 +182,7 @@ function render_table(list) {
       if (e.target.classList.contains('op_update')) {
         show_form(form_main);
         const row = admin.findIn(rows, id); // ✅ 不再依赖 admin.find
-        admin.value2form(row);
+        admin.value2form(row, form_main);
       }
 
       if (e.target.classList.contains('op_delete')) {
@@ -234,7 +234,7 @@ function listen() {
 
     // 姓名校验：不得含数字，长度≤64
     if (!validateName(row.full_name)) {
-      yo_error('Full name cannot contain digits and must be ≤ 64 characters')
+      yo_error('Full name cannot contain digits, illegal characters and must be ≤ 64 characters')
       return
     }
 
@@ -267,15 +267,6 @@ function listen() {
   })
 }
 
-// function validateDob(dob) {
-//   // YYYY-MM-DD（MySQL DATE）
-//   const m = dob.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-//   if (!m) return false;
-//   const y = +m[1], mo = +m[2], d = +m[3];
-//   const dt = new Date(y, mo - 1, d);
-//   // 简单合法性检查（防 2025-02-31 这种）
-//   return dt.getFullYear() === y && (dt.getMonth() + 1) === mo && dt.getDate() === d;
-// }
 function validateDob(dob) {
   // YYYY-MM-DD（MySQL DATE）
   if (typeof dob !== 'string') return false;
@@ -302,8 +293,24 @@ function validateDob(dob) {
 function validateName(name) {
   if (name == null) return false;
   const s = String(name).trim();
-  if (!s || s.length > 64) return false;   // 长度 <= 64
-  if (/^[a-zA-Z0-9_-]{4,16}$/.test(s)) return false;          // 不允许任何数字
-  // 如需更严格字符集，可用：/^[\p{L} .'-]{1,64}$/u
-  return true;
+  if (!s || s.length > 64) return false;
+  const re = /^[A-Za-z][A-Za-z .'-]*[A-Za-z]$/;
+
+  return re.test(s);
 }
+
+admin.attachRowOps({
+  table: table_main,
+  getRows: () => rows,
+  form: form_main,
+  onUpdate: async (row, { form }) => {
+    show_form(form);
+    admin.value2form(row, form);
+  },
+  onDelete: async (id) => {
+    if (!confirm('Are you sure you want to delete this guest?')) return;
+    const r = await api('guest/delete', { id });
+    if (r.ok) { await list_and_render(); yo_success('Guest deleted successfully'); }
+    else yo_error(r.error || 'Delete failed');
+  },
+});

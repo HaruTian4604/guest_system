@@ -57,21 +57,21 @@ export class Placement extends Base {
   }
 
   // 在 export class Placement 内新增：
-static async listByGuest(guest_id: number) {
-  const conn = await get_connection();
-  try {
-    const [rows] = await conn.query<RowDataPacket[]>(
-      `SELECT ${this._selectColumns()}
+  static async listByGuest(guest_id: number) {
+    const conn = await get_connection();
+    try {
+      const [rows] = await conn.query<RowDataPacket[]>(
+        `SELECT ${this._selectColumns()}
          FROM ${this._readFrom()}
         WHERE archived = 0 AND guest_id = ?
         ORDER BY start_date DESC, id DESC`,
-      [guest_id]
-    );
-    return rows;
-  } finally {
-    conn.end();
+        [guest_id]
+      );
+      return rows;
+    } finally {
+      conn.end();
+    }
   }
-}
 
   static async assertNoOverlap(row: any, selfId?: number) {
     const conn = await get_connection();
@@ -133,6 +133,52 @@ static async listByGuest(guest_id: number) {
     const selfId = Number(row.id || 0) || undefined;
     await this.assertNoOverlap(row, selfId);
     return await super.update(row);
+  }
+
+  static async getEndingsNext12Months(): Promise<Array<{ month: string; count: number }>> {
+    // 生成 [当前月1号, ... 未来第11个月1号] 共 12 个
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), 1);
+    const end   = new Date(start.getFullYear(), start.getMonth() + 12, 1);
+
+    const ymKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+    // 先做一个“月份骨架”
+    const months: Array<{ month: string; count: number }> = [];
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+      months.push({ month: ymKey(d), count: 0 });
+    }
+
+    const conn = await get_connection();
+    try {
+      // 数据库内按 YYYY-MM 聚合
+      const [rows] = await conn.query<RowDataPacket[]>(
+        `
+          SELECT DATE_FORMAT(end_date, '%Y-%m') AS ym, COUNT(*) AS cnt
+          FROM placements
+          WHERE end_date IS NOT NULL
+            AND end_date >= ?
+            AND end_date <  ?
+          GROUP BY ym
+          ORDER BY ym
+        `,
+        [ start, end ]
+      );
+
+      // 把 DB 结果写回到骨架中
+      const map = new Map<string, number>();
+      for (const r of rows) {
+        map.set(String((r as any).ym), Number((r as any).cnt || 0));
+      }
+      for (const m of months) {
+        if (map.has(m.month)) m.count = map.get(m.month)!;
+      }
+
+      return months;
+    } finally {
+      conn.end();
+    }
   }
 }
 

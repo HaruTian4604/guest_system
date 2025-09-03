@@ -122,9 +122,6 @@ function value2form(row, form) {
   }
 }
 
-
-// ---------- 通用表格渲染 ----------
-
 function list2table({ table, rows, columns }) {
   const tbody = table.tBodies[0] || table.createTBody();
   tbody.innerHTML = '';

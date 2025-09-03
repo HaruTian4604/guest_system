@@ -34,9 +34,25 @@ export class Accommodation extends Base {
     }
   }
 
-  // 详情：沿用 Base.pick() 即可（已读视图）
-  // 列表：沿用 Base.list() 即可（已读视图）
-
-  // 若详情页“备注”功能使用 accommodation.update({note})
-  // 且你表里有 note 字段，则无需额外处理；否则请在 DB 增加 note 列
+ static async getStats(): Promise<{ available: number; unavailable: number; total: number }> {
+    const conn = await get_connection();
+    try {
+      const [rows] = await conn.query<RowDataPacket[]>(
+        `SELECT
+           SUM(CASE WHEN status = 'available'   COLLATE utf8mb4_0900_ai_ci THEN 1 ELSE 0 END) AS available,
+           SUM(CASE WHEN status = 'unavailable' COLLATE utf8mb4_0900_ai_ci THEN 1 ELSE 0 END) AS unavailable,
+           COUNT(*) AS total
+         FROM view_accommodations
+         WHERE archived = 0`
+      );
+      const r = (rows[0] || {}) as any;
+      return {
+        available: Number(r.available || 0),
+        unavailable: Number(r.unavailable || 0),
+        total: Number(r.total || 0),
+      };
+    } finally {
+      conn.end();
+    }
+  }
 }

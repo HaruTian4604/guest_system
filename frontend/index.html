@@ -16,13 +16,11 @@
   <div id="topbar"></div>
   <div class="row m-0">
     <div id="sidebar" class="sidebar col-2"></div>
-    <!-- 修改后的 Dashboard 部分 -->
     <div class="content col">
       <h1>Dashboard</h1>
-      <div class="row">
-        <!-- Panel 1: Guest Overview -->
+      <div class="row g-3">
         <div class="col-md-4">
-          <div class="panel">
+          <div class="panel h-100">
             <div class="panel-heading">
               <h3 class="panel-title">Guest Overview</h3>
             </div>
@@ -47,27 +45,68 @@
             </div>
           </div>
         </div>
-        <!-- 其他面板保持不变 -->
+
+        <!-- Panel 2: Accommodation -->
+        <div class="col-md-4">
+          <div class="panel h-100">
+            <div class="panel-heading">
+              <h3 class="panel-title">Accommodation Overview</h3>
+            </div>
+            <div class="panel-body">
+              <div class="stats-summary">
+                <div class="stat-item">
+                  <span class="stat-label">Total Accommodation</span>
+                  <span id="total-accommodations" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label text-success">Available</span>
+                  <span id="available-accommodations" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label text-warning">Unavailable</span>
+                  <span id="unavailable-accommodations" class="stat-value">0</span>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="accommodationChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Placement -->
+        <div class="col-md-4">
+          <div class="panel h-100">
+            <div class="panel-heading">
+              <h3 class="panel-title">Placements Ending</h3>
+            </div>
+            <div class="panel-body">
+              <div class="chart-container">
+                <canvas id="placementChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-<!-- 先告诉 layout 当前页 -->
-<script>
-  window.pageConfig = {
-    active: 'dashboard',
-    title: 'Dashboard',
-    brand: 'Refugee System'
-  };
+  <!-- 先告诉 layout 当前页 -->
+  <script>
+    window.pageConfig = {
+      active: 'dashboard',
+      title: 'Dashboard',
+      brand: 'Refugee System'
+    };
 
-  // 让页面专用脚本跟在公共脚本之后按顺序加载
-  window.pageScripts = [
-    'node_modules/chart.js/dist/chart.umd.js',
-    'js/dashboard.js'
-  ];
-</script>
+    // 让页面专用脚本跟在公共脚本之后按顺序加载
+    window.pageScripts = [
+      'node_modules/chart.js/dist/chart.umd.js',
+      'js/dashboard.js'
+    ];
+  </script>
 
-<!-- 统一加载：yo.js -> pager.js -> layout.js -> main.js -> userswitch.js -> log.js -> (Chart) -> (dashboard) -->
-<script src="js/common/common-scripts.js"></script>
+  <!-- 统一加载：yo.js -> pager.js -> layout.js -> main.js -> userswitch.js -> log.js -> (Chart) -> (dashboard) -->
+  <script src="js/common/common-scripts.js"></script>
 
 
 </body>
