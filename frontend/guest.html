@@ -22,7 +22,6 @@
       <div class="toolbar mb-3">
         <div class="btn-group">
           <button id="btn_add" class="btn btn-secondary">Add New</button>
-          <!-- <button id="btn_export" class="btn btn-outline-secondary">Export</button> -->
         </div>
         <form id="form_search" class="d-inline-block search">
           <div class="input-group">
@@ -43,19 +42,9 @@
           </div>
           <div class="form-group">
             <label for="date_of_birth">Date of Birth</label>
-            <!-- <input name="date_of_birth" id="date_of_birth" class="form-control" type="text" placeholder="DD-MM-YYYY"
-              pattern="\d{2}-\d{2}-\d{4}" required> -->
               <input type="date" name="date_of_birth" id="date_of_birth" class="form-control"placeholder="YYYY-MM-DD"
               pattern="\d{4}/\d{2}/\d{2}" required />
           </div>
-          <!-- <div class="form-group">
-            <label for="status">Status</label>
-            <select name="status" id="status" class="form-control" required>
-              <option value="">Select status...</option>
-              <option value="placed">Placed</option>
-              <option value="unplaced">Unplaced</option>
-            </select>
-          </div> -->
           <div class="form-group">
             <button class="btn btn-primary" type="submit">Submit</button>
             <button id="form_main_cancel" class="btn btn-secondary" type="button">Cancel</button>

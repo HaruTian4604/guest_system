@@ -19,6 +19,7 @@
     <div class="content col">
       <h1>Dashboard</h1>
       <div class="row g-3">
+        <!-- Panel 1: Guest -->
         <div class="col-md-4">
           <div class="panel h-100">
             <div class="panel-heading">
@@ -90,7 +91,6 @@
       </div>
     </div>
   </div>
-  <!-- 先告诉 layout 当前页 -->
   <script>
     window.pageConfig = {
       active: 'dashboard',
@@ -98,17 +98,12 @@
       brand: 'Refugee System'
     };
 
-    // 让页面专用脚本跟在公共脚本之后按顺序加载
     window.pageScripts = [
       'node_modules/chart.js/dist/chart.umd.js',
       'js/dashboard.js'
     ];
   </script>
-
-  <!-- 统一加载：yo.js -> pager.js -> layout.js -> main.js -> userswitch.js -> log.js -> (Chart) -> (dashboard) -->
   <script src="js/common/common-scripts.js"></script>
-
-
 </body>
 
 </html>
