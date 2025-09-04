@@ -8,7 +8,6 @@ const table_main = document.getElementById('table_main')
 const form_main_cancel = document.getElementById('form_main_cancel')
 const e_pager = document.getElementById('pager')
 const hostSelect = document.getElementById('host_id')
-// const statusSelect = document.getElementById('status')
 
 const limit = 10
 let rows, total, pager, list_args = { limit }
@@ -36,7 +35,6 @@ async function boot() {
 
 async function loadHostOptions() {
   try {
-    // Load all hosts
     const hosts = await admin.list('host', { limit: 1000 });
     if (hosts.ok && hosts.data) {
       hostSelect.innerHTML = '<option value="">Select host...</option>';
@@ -71,79 +69,6 @@ async function list_and_render() {
   }
 }
 
-// function render_table(list) {
-//   const e_tbody = table_main.tBodies[0]
-//   e_tbody.innerHTML = ''
-
-//   if (!list || list.length === 0) {
-//     e_tbody.innerHTML = `<tr><td colspan="6" class="text-center">No accommodations found</td></tr>`
-//     return
-//   }
-
-//   for (let it of list) {
-//     const tr = document.createElement('tr')
-//     tr.dataset.id = it.id
-
-//     tr.innerHTML = `
-//       <td>${it.id}</td>
-//       <td><a href="accommodation-detail.html?id=${it.id}">${it.address || '-'}</a></td>
-//       <td>${it.postcode || '-'}</td>
-//       <td><a href="host-detail.html?id=${it.host_id}">${it.host_name || '-'}</a></td>
-//       <td><span class="badge ${it.status === 'available' ? 'badge-success' : 'badge-warning'}">${it.status}</span></td>
-//       <td>
-//         <div class="op btn-group">
-//           <button type="button" class="op_update btn btn-secondary btn-sm">Update</button>
-//           <button type="button" class="op_delete btn btn-danger btn-sm">Delete</button>
-//         </div>
-//       </td>
-//     `
-//     e_tbody.appendChild(tr)
-//   }
-
-//   if (!state.table_listening) {
-//     state.table_listening = true
-//     e_tbody.addEventListener('click', async e => {
-//       const op = e.target.closest('.op')
-//       const tr = e.target.closest('tr')
-//       if (!tr) return
-
-//       const id = tr.dataset.id
-
-//       if (op) {
-//         if (e.target.classList.contains('op_update')) {
-//           show_form(form_main)
-//           const row = admin.find(id)
-//           admin.value2form(row)
-//           await loadHostOptions(); // Reload options
-//         }
-
-//         if (e.target.classList.contains('op_delete')) {
-//           if (!confirm('Are you sure you want to delete this accommodation?')) return
-
-//           const r = await api('accommodation/delete', { id })
-//           if (r.ok) {
-//             await list_and_render()
-//             yo_success('Accommodation deleted successfully')
-//           } else {
-//             if (r.error.includes('foreign key constraint')) {
-//               const regex = /foreign key constraint fails \(`([\w]+)`\.`([\w]+)`, CONSTRAINT `([\w]+)`/;
-//               const match = r.error.match(regex);
-
-//               if (match && match[2] && match[1]) {
-//                 const table = match[2]; // e.g., `placements`
-//                 yo_error(`Cannot delete the accommodation. Because it is linked to a [${table}] record. Please handle that then try again.`);
-//               } else {
-//                 yo_error('Cannot delete the accommodation due to foreign key constraint.');
-//               }
-//             } else {
-//               yo_error(`Error: ${r.error}`);
-//             }
-//           }
-//         }
-//       }
-//     })
-//   }
-// }
 function render_table(list) {
   const e_tbody = table_main.tBodies[0]
   e_tbody.innerHTML = ''
@@ -175,24 +100,18 @@ function render_table(list) {
   if (!state.table_listening) {
     state.table_listening = true
     e_tbody.addEventListener('click', async e => {
-      if (e.target.closest('a')) return; // 放行链接
+      if (e.target.closest('a')) return;
       const op = e.target.closest('.op')
       const tr = e.target.closest('tr')
       if (!tr) return
       const id = tr.dataset.id
 
       if (op) {
-        // if (e.target.classList.contains('op_update')) {
-        //   show_form(form_main)
-        //   const row = admin.findIn(rows, id)   // ← 这里改了
-        //   admin.value2form(row)
-        //   await loadHostOptions();
-        // }
         if (e.target.classList.contains('op_update')) {
           const row = admin.findIn(rows, id);
-          await loadHostOptions();          // 先把 <select> 选项准备好
+          await loadHostOptions();
           show_form(form_main);
-          admin.value2form(row, form_main); // 把数据灌进当前表单
+          admin.value2form(row, form_main);
         }
 
         if (e.target.classList.contains('op_delete')) {
@@ -232,7 +151,6 @@ function hide_form(form) {
 
 function reset_form(form) {
   form.reset()
-  // if (statusSelect) statusSelect.value = ''
 }
 
 function listen() {
@@ -250,14 +168,11 @@ function listen() {
     const row = admin.form2value(form_main)
     let action = row.id ? 'update' : 'create'
 
-    // Validate required fields
-    // if (!row.address || !row.postcode || !row.host_id || !row.status) {
     if (!row.address || !row.postcode || !row.host_id) {
       yo_error('Please fill all required fields')
       return
     }
 
-    // Validate postcode format (basic UK validation)
     if (!validatePostcode(row.postcode)) {
       yo_error('Please enter a valid UK postcode')
       return
@@ -285,7 +200,6 @@ function listen() {
 }
 
 function validatePostcode(postcode) {
-  // Basic UK postcode validation
   const regex = /^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$/i
   return regex.test(postcode)
 }

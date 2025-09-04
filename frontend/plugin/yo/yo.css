@@ -15,7 +15,7 @@
   top: 1rem;
   left: 50%;
   transform: translateX(-50%);
-   z-index: 2147483647; /* 非常大，基本碾压一切层 */
+   z-index: 2147483647;
 }
 .yo-container {
   background: #fff;

@@ -1,10 +1,7 @@
-/**
- * list out data
- */
+//frontend/js/common/main.js
 async function list(model, args) {
   return api(model + '/list', args)
 }
-// 安全的 query 序列化
 function to_querystring(obj = {}) {
   return Object.entries(obj)
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
@@ -19,7 +16,6 @@ function to_querystring(obj = {}) {
 async function api(seg, args = {}) {
   try {
     const token = window.userAuth?.getCurrentUserToken();
-    // console.log("api/token: ",token)
     const headers = {
       'X-Auth-Token': token || ''
     };
@@ -38,13 +34,12 @@ async function api(seg, args = {}) {
       if (!r.ok) {
         yo_error(`API error: ${r.error || 'Unknown error'}`, '');
       }
-      return r; // 确保在成功和已知错误时都返回响应
+      return r;
     }
 
     return r;
   } catch (err) {
     yo_error(`Network error: ${err.message}`);
-    // throw err;
     return { ok: false, error: err.message };
   }
 }
@@ -88,11 +83,10 @@ function value2form(row, form) {
       continue;
     }
 
-    // 统一字符串
     const asStr = (v) => v == null ? '' : String(v);
 
     if (el.tagName === 'SELECT') {
-      el.value = asStr(val);        // 选项已存在时会正确选中
+      el.value = asStr(val);
       continue;
     }
 
@@ -117,7 +111,6 @@ function value2form(row, form) {
       continue;
     }
 
-    // 默认文本/数字等
     el.value = asStr(val);
   }
 }
@@ -194,12 +187,11 @@ function list2table({ table, rows, columns }) {
       tr.appendChild(td);
     }
 
-    tr.dataset.id = it.id; // 方便点击行内按钮时取 ID
+    tr.dataset.id = it.id;
     tbody.appendChild(tr);
   }
 }
 
-// 不依赖“全局 rows”的查找器
 function findIn(list, id) {
   return (list || []).find(it => String(it.id) === String(id));
 }
@@ -287,13 +279,12 @@ function attach_pager_events(containerEl, pager) {
   });
 }
 
-// 放行 <a> 默认跳转（防止页面自己的委托拦截到链接）
 document.addEventListener('click', (e) => {
   const a = e.target && e.target.closest && e.target.closest('a.link-id');
-  if (a) return; // 不阻止
+  if (a) return;
 }, true);
 
-window.attach_pager_events = attach_pager_events; // 导出给页面用
+window.attach_pager_events = attach_pager_events;
 
 window.api = api
 

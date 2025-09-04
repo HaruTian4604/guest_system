@@ -80,14 +80,10 @@ function yo(config) {
   }
 }
 
-/**
- * 初始化
- */
 function init() {
   el = document.querySelector('.yo')
 
   if (!el) {
-    // 创建初始元素
     el = document.createElement('div')
     el.classList.add('yo')
     el.innerHTML = `

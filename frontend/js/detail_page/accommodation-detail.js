@@ -49,7 +49,7 @@
 
   const page = new Details.DetailPage({
     model: 'accommodation',
-    pickSeg: 'accommodation/pick',  // ★ 后端实际存在的详情端点
+    pickSeg: 'accommodation/pick',
     afterLoad: renderAccommodationInfo,
 
     sections: {
@@ -64,19 +64,6 @@
           columns: [
             { render: (p) => `<td><a href="guest-detail.html?id=${p.guest_id}">${p.guest_name || '-'}</a></td>` },
             { render: (p) => `<td><a href="host-detail.html?id=${p.host_id}">${p.host_name || '-'}</a></td>` },
-            // { render: (p) => `<td>${Details.formatDDMMYYYY(p.start_date)}</td>` },
-            // { render: (p) => `<td>${p.end_date ? Details.formatDDMMYYYY(p.end_date) : 'Ongoing'}</td>` },
-            // {
-            //   render: (p) => {
-            //     const today = new Date();
-            //     const [d,m,y] = p.end_date ? p.end_date.split('-').map(Number) : [];
-            //     const endDate = p.end_date ? new Date(y, m - 1, d) : null;
-            //     const ended = endDate && endDate < today;
-            //     const klass = ended ? 'badge-secondary' : 'badge-success';
-            //     const label = ended ? 'Completed' : 'Active';
-            //     return `<td><span class="badge ${klass}">${label}</span></td>`;
-            //   }
-            // },
             { render: (p) => `<td>${Details.formatYMD(p.start_date)}</td>` },
             { render: (p) => `<td>${p.end_date ? Details.formatYMD(p.end_date) : '-'}</td>` },
             {

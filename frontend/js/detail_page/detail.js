@@ -1,35 +1,18 @@
 // detail.js
-
 window.Details = {
     getIdFromUrl(key = 'id') {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(key);
     },
 
-    // formatDDMMYYYY(dateStr) {
-    //     if (!dateStr) return '-';
-    //     try {
-    //         const [day, month, year] = dateStr.split('-');
-    //         const d = new Date(Number(year), Number(month) - 1, Number(day));
-    //         return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    //     } catch {
-    //         return dateStr;
-    //     }
-    // },
-
 formatYMD(dateStr) {
   if (!dateStr) return '-';
-  // 兼容三种输入：YYYY-MM-DD | YYYY-MM-DDTHH:mm:ss.sssZ | DD-MM-YYYY
   if (typeof dateStr === 'string') {
-    // ISO: 截前10位即可
     if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) return dateStr.slice(0, 10);
-    // 已是 YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // 兼容旧的 DD-MM-YYYY
     const m2 = dateStr.match(/^(\d{2})-(\d{2})-(\d{4})$/);
     if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
   }
-  // 兜底：如果给的是 Date 对象
   if (dateStr instanceof Date) {
     const y = dateStr.getFullYear();
     const m = String(dateStr.getMonth() + 1).padStart(2, '0');
@@ -44,11 +27,8 @@ calculateAge(dob) {
   try {
     let y, m, d;
     if (typeof dob === 'string') {
-      // ISO: 取前10位
       if (/^\d{4}-\d{2}-\d{2}T/.test(dob)) [y, m, d] = dob.slice(0, 10).split('-').map(Number);
-      // YYYY-MM-DD
       else if (/^\d{4}-\d{2}-\d{2}$/.test(dob)) [y, m, d] = dob.split('-').map(Number);
-      // DD-MM-YYYY
       else if (/^\d{2}-\d{2}-\d{4}$/.test(dob)) {
         const parts = dob.split('-').map(Number);
         d = parts[0]; m = parts[1]; y = parts[2];
@@ -113,8 +93,6 @@ calculateAge(dob) {
 
     class DetailPage {
         constructor(opt) { this.opt = opt || {}; this.data = null; }
-
-        // 在detail.js中的DetailPage类添加以下方法
         async loadRelatedData(id, cfg) {
             if (!cfg || !cfg.listSeg) return;
 
@@ -168,13 +146,7 @@ calculateAge(dob) {
             }
         }
 
-        // 修改boot方法以使用新的loadRelatedData
         async boot() {
-            // const id = Details.getIdFromUrl(this.opt.idKey || 'id');
-            // if (!id || isNaN(parseInt(id))) return Details.showErrorMessage('Invalid ID');
-
-            // const r = await api(this.opt.pickSeg, { id });
-            // if (!r?.ok) return Details.showErrorMessage(r?.error || 'Load failed');
             console.log('DetailPage boot started');
             const id = Details.getIdFromUrl(this.opt.idKey || 'id');
             console.log('ID from URL:', id);
@@ -185,7 +157,6 @@ calculateAge(dob) {
             }
 
             console.log('Fetching data from:', this.opt.pickSeg);
-            // const r = await api(this.opt.pickSeg, { id });
             let r;
             if (this.opt.pickSeg) {
                 r = await api(this.opt.pickSeg, { id });
@@ -210,7 +181,6 @@ calculateAge(dob) {
             if (typeof this.opt.afterLoad === 'function') this.opt.afterLoad(r.data);
             if (this.opt.sections?.notes) this.initNotes(id, this.opt.sections.notes);
 
-            // 加载所有相关数据部分
             if (this.opt.sections?.relatedData) {
                 for (const section of this.opt.sections.relatedData) {
                     await this.loadRelatedData(id, section);
@@ -275,6 +245,5 @@ calculateAge(dob) {
         }
     }
 
-    // 暴露到全局工具命名空间
     window.Details.DetailPage = DetailPage;
 })();
