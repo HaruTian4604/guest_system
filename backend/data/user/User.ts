@@ -8,10 +8,8 @@ export abstract class User {
     public readonly roleName: string
   ) {}
 
-  // 检查用户是否有权限执行特定操作
   abstract canPerform(action: string): boolean;
 
-  // 获取用户基本信息
   getUserInfo() {
     return {
       id: this.id,

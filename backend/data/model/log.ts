@@ -30,7 +30,6 @@ export class Log extends Base {
 
       const [rows] = await conn.query<RowDataPacket[]>(query, params);
 
-      // 解析JSON字段
       return rows.map(row => ({
         ...row,
         changes: typeof row.changes === 'string' ? JSON.parse(row.changes) : row.changes

@@ -6,7 +6,6 @@ export class Caseworker extends User {
     super(id, name, token, 2, 'caseworker');
   }
 
-  // 案例工作者没有删除权限
   canPerform(action: string): boolean {
     return !action.includes('delete');
   }

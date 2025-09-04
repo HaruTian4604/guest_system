@@ -6,7 +6,6 @@ const http = require('http');
 
 export async function create_server() {
   const server = http.createServer(async (request, response) => {
-    // ---- CORS 统一处理（含预检）----
     response.setHeader('Access-Control-Allow-Origin', '*')
     response.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type,X-Auth-Token')
@@ -15,7 +14,6 @@ export async function create_server() {
       response.end()
       return
     }
-    // --------------------------------
 
     parse_request(request)
     try {

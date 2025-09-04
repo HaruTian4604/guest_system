@@ -19,11 +19,6 @@ export function parse_request(request: any) {
   request.$query = q;
   request.$path = path;
 
-  // 添加认证头处理. 仅设置token，不查找用户
-  // const authHeader = request.headers['x-auth-token'];
-  // if (authHeader) {
-  //   request.$token = authHeader;
-  // }
   const headerToken = request.headers?.['x-auth-token'];
   const token = (typeof headerToken === 'string' && headerToken.trim()) || (typeof q.token === 'string' && q.token.trim());
 
@@ -33,14 +28,11 @@ export function parse_request(request: any) {
     try {
       const user = findUserByToken(token);
       if (user) {
-        // 找到用户就挂到 req.$user，供 requireRole 等中间件使用
         request.$user = user;
       } else {
-        // token 无效时不要抛错，这里只是不挂 $user，让后续的权限中间件去返回 401/403
         request.$user = undefined;
       }
     } catch (e) {
-      // 查库异常同样不在这里终止请求，交给后续逻辑处理
       request.$user = undefined;
     }
   } else {
@@ -66,7 +58,6 @@ export async function parse_route(request, response) {
         body = def;
         break;
       case 'function':
-        // body = await def(request, response);
         body = await RequestContext.run({ user: request.$user }, async () => {
           return await def(request, response);
         });
@@ -90,13 +81,11 @@ export async function parse_route(request, response) {
 export function requireRole(requiredRole: string) {
   return (handler: Function) => {
     return async (req: any, res: any) => {
-      // 如果没有用户登录
       if (!req.$user.token) {
         res.statusCode = 401;
         return { ok: false, error: 'Authentication required' };
       }
 
-      // 检查角色权限
       if (req.$user.roleName !== requiredRole) {
         res.statusCode = 403;
         return {
@@ -105,7 +94,6 @@ export function requireRole(requiredRole: string) {
         };
       }
 
-      // 权限通过，执行原始处理函数
       return await handler(req, res);
     };
   };

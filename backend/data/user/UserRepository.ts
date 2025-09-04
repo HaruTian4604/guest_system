@@ -4,10 +4,8 @@ import { Admin } from './Admin';
 import { Caseworker } from './Caseworker';
 import { User } from './User';
 
-// 用户存储映射
 const users: Map<number, User> = new Map();
 
-// 初始化用户存储
 Object.entries(userList).forEach(([key, data]) => {
   const id = parseInt(key);
   const { name, token, roleIndex } = data;
@@ -24,7 +22,6 @@ Object.entries(userList).forEach(([key, data]) => {
   }
 });
 
-// 根据token查找用户
 export function findUserByToken(token: string): User | null {
   for (const user of users.values()) {
     if (user.token == token) {
@@ -34,7 +31,6 @@ export function findUserByToken(token: string): User | null {
   return null;
 }
 
-// 获取所有用户列表（用于前端切换）
 export function getAllUsers(): User[] {
   return Array.from(users.values());
 }
@@ -51,7 +47,6 @@ export function getCurrentUser(token: string) {
   };
 }
 
-// 添加获取所有用户的方法
 export function listAllUsers() {
   return Array.from(users.values()).map(u => ({
     token: u.token,

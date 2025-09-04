@@ -15,19 +15,16 @@ export class Base {
   static searchable: string[];
   static fillable: string[];
   static columns: string | string[] = '*';
-  static viewName?: string; // 新增：若设置则读取走视图
+  static viewName?: string;
 
-  id: number; // Unique identifier
-  // base.ts
+  id: number;
   protected static _orderable(): string[] {
-    // 允许排序的列 = fillable + 常见主键/时间列
     const extra = ['id', 'created_at', 'updated_at'];
     const s = new Set([...(this.fillable || []), ...extra]);
     return Array.from(s);
   }
 
   protected static _readFrom(): string {
-    // 读操作统一走 viewName（若声明），否则走 tableName
     return (this as any).viewName || this.tableName;
   }
 
@@ -49,7 +46,6 @@ export class Base {
     return Array.isArray(cols) ? cols.join(', ') : cols;
   }
   protected static _currentOperator() {
-    // return { operator_id: 0, operator_name: 'system' };
     const user = getCurrentUser();
     if (user) return { operator_id: user.id, operator_name: user.name };
     return { operator_id: 0, operator_name: 'system' };
@@ -92,7 +88,6 @@ export class Base {
     }
   }
 
-  // 原 _log 改为支持复用 conn
   protected static async _log(op: OpType, record_id: number, before: any, after: any, conn?: Connection) {
     const { operator_id, operator_name } = this._currentOperator();
     const changes =
@@ -100,7 +95,6 @@ export class Base {
         op === 'DELETE' ? { before: this._pickFillable(before) } :
           this._diff(before, after);
 
-    // 优先用传入的事务连接；否则自己开关一次性连接（兼容非事务场景）
     if (conn) {
       await conn.query(
         `INSERT INTO operation_log
@@ -132,18 +126,6 @@ export class Base {
     return { where: ` WHERE ${cond}`, params };
   }
 
-  // static async count(keyword?: string): Promise<number> {
-  //   const conn = await get_connection();
-  //   try {
-  //     let sql = `SELECT COUNT(*) as count FROM ${this.tableName}`;
-  //     const { where, params } = this._buildKeywordWhere(keyword);
-  //     sql += where;
-  //     const [rows] = await conn.query<RowDataPacket[]>(sql, params);
-  //     return rows[0].count as number;
-  //   } finally {
-  //     conn.end();
-  //   }
-  // }
     static async count(keyword?: string): Promise<number> {
     const conn = await get_connection();
     try {
@@ -214,7 +196,6 @@ export class Base {
       const { id, ...rest } = partial;
       const updates = this._onlyFillable(rest);
 
-      // ⭐ 没有任何可更新字段，直接返回当前行（不写空 UPDATE）
       if (Object.keys(updates).length === 0) {
         return before;
       }
@@ -247,7 +228,6 @@ export class Base {
 
     const conn = await get_connection();
     try {
-      // let sql = `SELECT ${this._selectColumns()} FROM ${this.tableName}`;
       let sql = `SELECT ${this._selectColumns()} FROM ${this._readFrom()}`;
 
       const { where, params } = this._buildKeywordWhere(keyword);
@@ -269,7 +249,6 @@ export class Base {
   static async pick(id: number, conn?: Connection): Promise<any> {
     if (conn) {
       const [rows] = await conn.query<RowDataPacket[]>(
-        // `SELECT * FROM ${this.tableName} WHERE id = ?`,
         `SELECT * FROM ${this._readFrom()} WHERE id = ?`,
         [id]
       );
@@ -279,7 +258,6 @@ export class Base {
     const c = await get_connection();
     try {
       const [rows] = await c.query<RowDataPacket[]>(
-        // `SELECT * FROM ${this.tableName} WHERE id = ?`,
         `SELECT * FROM ${this._readFrom()} WHERE id = ?`,
         [id]
       );
@@ -294,8 +272,6 @@ export class Base {
    * Validate record data
    */
   static validate(row: any) { }
-
-  // 在base.ts中添加以下方法
 
   protected static async _checkDateOverlap(
     table: string,
@@ -328,7 +304,6 @@ export class Base {
     }
   }
 
-  // 添加状态更新方法
   protected static async _updateStatus(
     table: string,
     id: number,
