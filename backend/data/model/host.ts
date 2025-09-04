@@ -6,8 +6,8 @@ import { get_connection } from '../../boot/database';
 export class Host extends Base {
   static tableName = 'hosts';
   static searchable: string[] = ['full_name'];
-  static fillable: string[] = ['full_name'];
-  static columns: string[] = ['id', 'full_name'];
+  static fillable: string[] = [ 'note','full_name'];
+  static columns: string[] = ['id', 'full_name', 'note'];
 
   static validate(row: any) {
     if (row.full_name) {

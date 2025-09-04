@@ -13,7 +13,7 @@ export class Guest extends Base {
   static fillable = ['full_name', 'date_of_birth', 'note', 'archived'];
 
   static columns: string | string[] =
-    'id, full_name, date_of_birth, note, archived, status';
+    'id, full_name, date_of_birth, note, archived,status';
 
   static validate(row: any) {
     if ('full_name' in row) {

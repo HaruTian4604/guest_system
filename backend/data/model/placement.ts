@@ -10,7 +10,7 @@ export class Placement extends Base {
 
   static searchable = ['guest_name', 'host_name', 'accommodation_address', 'accommodation_postcode'];
 
-  static fillable = ['guest_id', 'host_id', 'accommodation_id', 'start_date', 'end_date', 'archived'/*, 'note'*/];
+  static fillable = ['guest_id', 'host_id', 'accommodation_id', 'start_date', 'end_date', 'archived', 'note'];
 
   static columns: string | string[] =
     'id, guest_id, guest_name, host_id, host_name, accommodation_id, accommodation_address, accommodation_postcode, start_date, end_date, archived, status';
