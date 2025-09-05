@@ -1,0 +1,32 @@
+{
+    "1": {
+        "id": 1,
+        "name": "iamadmin",
+        "token": "1415926",
+        "roleIndex": 1
+    },
+    "2": {
+        "id": 2,
+        "name": "iamcaseworker",
+        "token": "5358979",
+        "roleIndex": 2
+    },
+    "3": {
+        "id": 3,
+        "name": "iamcaseworker_2",
+        "token": "3238462",
+        "roleIndex": 2
+    },
+    "4": {
+        "id": 4,
+        "name": "iamcaseworker_3",
+        "token": "6433832795",
+        "roleIndex": 2
+    },
+    "5": {
+        "id": 5,
+        "name": "iamadmin_2",
+        "token": "02384197",
+        "roleIndex": 1
+    }
+}
